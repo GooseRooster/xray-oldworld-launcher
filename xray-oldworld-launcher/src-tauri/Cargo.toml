@@ -3,7 +3,7 @@ name = "xray-oldworld-launcher"
 version = "0.1.0"
 description = "Launcher for X-Ray Monolith: Old World Edition"
 authors = ["GoozE"]
-edition = "2026"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
