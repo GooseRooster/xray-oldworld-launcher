@@ -1,0 +1,38 @@
+name: Discord Commit Notification
+
+on:
+  push:
+    branches:
+      - '**'  # All branches, or specify like [master, main, develop]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          # Extract commit info
+          BRANCH="${GITHUB_REF_NAME}"
+          AUTHOR="${{ github.actor }}"
+          COMMIT_HASH="${{ github.sha }}"
+          SHORT_HASH="${COMMIT_HASH:0:8}"
+          COMMIT_MESSAGE=$(echo '${{ github.event.head_commit.message }}' | head -1)
+          
+          # Send to Discord
+          curl -H "Content-Type: application/json" \
+            -d "{
+              \"username\": \"Launcher Hook\",
+              \"embeds\": [{
+                \"title\": \"Commit Details\",
+                \"color\": 5814783,
+                \"fields\": [
+                  {\"name\": \"Branch\", \"value\": \"${BRANCH}\", \"inline\": true},
+                  {\"name\": \"Author\", \"value\": \"${AUTHOR}\", \"inline\": true},
+                  {\"name\": \"Commit Hash\", \"value\": \"${SHORT_HASH}\", \"inline\": true},
+                  {\"name\": \"Commit Message\", \"value\": \"${COMMIT_MESSAGE}\", \"inline\": false}
+                ]
+              }]
+            }" \
+            "$DISCORD_WEBHOOK"
