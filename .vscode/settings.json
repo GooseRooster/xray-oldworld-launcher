@@ -1,0 +1,5 @@
+{
+  "rust-analyzer.linkedProjects": [
+    "xray-oldworld-launcher/src-tauri/Cargo.toml"
+  ]
+}
