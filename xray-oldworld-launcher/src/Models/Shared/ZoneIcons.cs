@@ -1,10 +1,9 @@
 namespace XrayOldworldLauncher.Models.Shared;
 
-
 public static class ZoneIcons
 {
     public static string Radiation = """
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 110 110" width="24" height="24">
             <!-- Outer circle with worn effect -->
             <circle cx="50" cy="50" r="45" fill="none" stroke="#6B7556" stroke-width="2" opacity="0.6"/>
             <circle cx="50" cy="50" r="45" fill="none" stroke="#6B7556" stroke-width="1.5" opacity="0.3" stroke-dasharray="5,3"/>
@@ -23,16 +22,11 @@ public static class ZoneIcons
             
             <!-- Weathering overlay -->
             <circle cx="50" cy="50" r="45" fill="none" stroke="#3A3A32" stroke-width="0.5" opacity="0.3" stroke-dasharray="2,4"/>
-            </svg>
-    
-    
-    
-     """;
+        </svg>
+    """;
 
-
-     public static string Video = """
-     
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+    public static string Video = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 110 110" width="24" height="24">
             <!-- Monitor body -->
             <rect x="15" y="20" width="70" height="50" rx="2" fill="#2D2D28" stroke="#6B7556" stroke-width="2"/>
             <rect x="18" y="23" width="64" height="44" fill="#1A1A16"/>
@@ -62,21 +56,18 @@ public static class ZoneIcons
             <circle cx="78" cy="75" r="2" fill="#CC8844" opacity="0.6"/>
             <circle cx="72" cy="75" r="2" fill="#6B7556" opacity="0.6"/>
         </svg>
-     
-     """;
+    """;
 
-
-     public static string Sound = """
-     
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+    public static string Sound = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 110 110" width="24" height="24">
             <!-- Background circle -->
             <circle cx="50" cy="50" r="42" fill="none" stroke="#3A3A32" stroke-width="1.5" opacity="0.4"/>
             
             <!-- Waveform -->
             <path d="M 20 50 L 25 45 L 30 35 L 35 42 L 40 50 L 45 58 L 50 65 L 55 58 L 60 50 L 65 42 L 70 35 L 75 45 L 80 50" 
-                    fill="none" stroke="#D4A574" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+                  fill="none" stroke="#D4A574" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
             <path d="M 20 50 L 25 47 L 30 40 L 35 45 L 40 50 L 45 55 L 50 60 L 55 55 L 60 50 L 65 45 L 70 40 L 75 47 L 80 50" 
-                    fill="none" stroke="#CC8844" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                  fill="none" stroke="#CC8844" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
             
             <!-- Speaker lines (left) -->
             <g opacity="0.6">
@@ -99,12 +90,10 @@ public static class ZoneIcons
                 <circle cx="65" cy="62" r="0.5" fill="#D4D4C8"/>
             </g>
         </svg>
-     
-     """;
+    """;
 
     public static string Gameplay = """
-    
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 110 110" width="24" height="24">
             <!-- Detector body -->
             <rect x="35" y="25" width="30" height="45" rx="3" fill="#3A3A32" stroke="#6B7556" stroke-width="2"/>
             <rect x="37" y="27" width="26" height="41" rx="2" fill="#2D2D28"/>
@@ -148,13 +137,10 @@ public static class ZoneIcons
             <line x1="38" y1="65" x2="42" y2="67" stroke="#1A1A16" stroke-width="0.5" opacity="0.3"/>
             <line x1="60" y1="30" x2="62" y2="34" stroke="#1A1A16" stroke-width="0.5" opacity="0.3"/>
         </svg>
-    
     """;
 
-
     public static string Anomaly = """
-    
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 110 110" width="24" height="24">
             <!-- Background contaminated area -->
             <circle cx="50" cy="50" r="40" fill="#6B7556" opacity="0.1"/>
             
@@ -203,13 +189,10 @@ public static class ZoneIcons
                 <circle cy="-1" r="0.8" fill="#D4D4C8"/>
             </g>
         </svg>
-    
     """;
 
-
     public static string Controls = """
-    
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 110 110" width="24" height="24">
             <!-- Keyboard section -->
             <g id="keyboard">
                 <rect x="20" y="35" width="60" height="35" rx="2" fill="#2D2D28" stroke="#6B7556" stroke-width="2"/>
@@ -260,6 +243,5 @@ public static class ZoneIcons
                 <circle cx="50" cy="28" r="2" fill="#4A6B72"/>
             </g>
         </svg>
-    
     """;
 }
