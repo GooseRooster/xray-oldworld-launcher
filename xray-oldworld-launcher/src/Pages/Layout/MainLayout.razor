@@ -1,6 +1,6 @@
 @inherits LayoutComponentBase
 
-<MudThemeProvider Theme="oldWorldTheme" IsDarkMode="true"/>
+<MudThemeProvider Theme="clearSkyTheme" IsDarkMode="true"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
@@ -10,10 +10,10 @@
 <ZoneBackground BackgroundImageUrl="/assets/background-alt.png" RainDropCount="30" />
 <MudLayout>
 
-    <MudAppBar Color="Color.Surface" Elevation="0" Style="background-color: rgba(58, 58, 50, 0.85); backdrop-filter: blur(8px);">
+    <MudAppBar Color="Color.Surface" Elevation="0">
         XRAY Monolith: Old World Edition
     </MudAppBar>
-    <MudDrawer Open="true" Color="Color.Surface" Elevation="0" Style="background-color: rgba(58, 58, 50, 0.9); backdrop-filter: blur(10px);">
+    <MudDrawer Open="true" Color="Color.Surface" Elevation="0">
         <MudNavMenu>
             <MudNavLink Href="/" Match="@NavLinkMatch.All" Icon="@ZoneIcons.Radiation">
                 Main
@@ -24,35 +24,43 @@
             <MudNavLink Href="/sound" Icon="@ZoneIcons.Sound">
                 Sound
             </MudNavLink>
-            <MudNavLink Href="/gameplay" Icon="@ZoneIcons.Gameplay">
+            @* <MudNavLink Href="/gameplay" Icon="@ZoneIcons.Gameplay">
                 Gameplay
             </MudNavLink>
             <MudNavLink Href="/thezone" Icon="@ZoneIcons.Anomaly">
                 The Zone
-            </MudNavLink>
+            </MudNavLink> *@
             <MudNavLink Href="/control" Icon="@ZoneIcons.Controls">
                 Control
             </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent Style="background-color: transparent;">
-        
-        @Body
+        <div class="content-panel">
+            @Body
+        </div>
     </MudMainContent>
 </MudLayout>
 
 @code {
-    MudTheme oldWorldTheme = new MudTheme() {
+    MudTheme clearSkyTheme = new MudTheme() {
         PaletteDark = new PaletteDark() {
-            Primary = "#6B7556",
-            Secondary = "#C87941",
-            Background = "#242420",
-            Surface = "#3A3A32",
-            Info = "#4A6B72",
-            Warning = "#CC8844",
-            Error = "#8B4A42",
-            TextPrimary = "#D4D4C8",
-            TextSecondary = "#8B8B7E"
+            Primary = "#5A6B7D",        // Steel blue-gray 
+            Secondary = "#6B8E9D",      // Desaturated cyan-blue 
+            Background = "#1E2228",     // Cool dark gray 
+            Surface = "#2F353D",        // Cool slate gray
+            Info = "#4A7B8C",           // Bright steel teal
+            Warning = "#9B8A6B",        // Muted brass/bronze 
+            Error = "#7A5456",          // Cool burgundy
+            TextPrimary = "#D4D8DC",    // Cool off-white
+            TextSecondary = "#8B9199"   // Cool medium gray
+        },
+        Typography = new Typography()
+        {
+            Button = new ButtonTypography
+            {
+                TextTransform = "none"  // Removes all-caps from buttons
+            }
         }
     };
 }

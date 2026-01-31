@@ -3,7 +3,7 @@
 
 @inject OptionsStateService StateService
 
-<MudPaper Class="pa-4 mb-3" Elevation="1">
+<div class="pa-4 mb-3">
     <MudText Typo="Typo.h6" Class="mb-3">@Group.Label</MudText>
 
     @foreach (var opt in Group.Options)
@@ -12,7 +12,7 @@
                        Value="@StateService.GetCurrentValue(opt, PageId, Group.Id)"
                        ValueChanged="@(v => OnOptionChanged(opt, v))" />
     }
-</MudPaper>
+</div>
 
 @code {
     [Parameter] public OptionGroup Group { get; set; } = null!;

@@ -6,7 +6,7 @@
 @inject IDialogService DialogService
 @implements IDisposable
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="py-4">
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-4" Style="background-color: transparent;">
     @if (!StateService.IsInitialized)
     {
         <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-4">
@@ -16,11 +16,6 @@
     }
     else
     {
-        @foreach (var group in Page.Groups)
-        {
-            <OptionFormGroup Group="@group" PageId="@Page.Id" />
-        }
-
         <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="mt-2 mb-4">
             <MudButton Variant="Variant.Outlined" Color="Color.Warning"
                        OnClick="ResetToDefaults" Disabled="@_busy"
@@ -41,6 +36,13 @@
                 }
             </MudButton>
         </MudStack>
+
+        @foreach (var group in Page.Groups)
+        {
+            <OptionFormGroup Group="@group" PageId="@Page.Id" />
+        }
+
+       
     }
 </MudContainer>
 
