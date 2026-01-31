@@ -12,6 +12,7 @@ pub struct LtxFile {
     root: IndexMap<String, Option<String>>,
 }
 
+#[allow(dead_code)]
 impl LtxFile {
     pub fn new() -> Self {
         LtxFile {

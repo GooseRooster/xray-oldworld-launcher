@@ -1,0 +1,25 @@
+@using XrayOldworldLauncher.Models.Options
+
+<MudSwitch T="bool"
+           Value="@_checked"
+           ValueChanged="OnValueChanged"
+           Label="@Definition.Label"
+           Color="Color.Primary" />
+@if (!string.IsNullOrEmpty(Definition.Description))
+{
+    <MudText Typo="Typo.caption" Class="ml-12 mt-n2 mb-2" Style="color: var(--mud-palette-text-secondary);">@Definition.Description</MudText>
+}
+
+@code {
+    [Parameter] public OptionDefinition Definition { get; set; } = null!;
+    [Parameter] public string Value { get; set; } = "false";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private bool _checked => Value.Equals("true", StringComparison.OrdinalIgnoreCase)
+                             || Value == "1" || Value.Equals("on", StringComparison.OrdinalIgnoreCase);
+
+    private async Task OnValueChanged(bool newValue)
+    {
+        await ValueChanged.InvokeAsync(newValue ? "true" : "false");
+    }
+}

@@ -1,0 +1,33 @@
+@using XrayOldworldLauncher.Models.Options
+
+<MudSelect T="string"
+           Value="@Value"
+           ValueChanged="OnValueChanged"
+           Label="@Definition.Label"
+           Variant="Variant.Outlined"
+           Dense="true"
+           Margin="Margin.Dense"
+           Class="mb-2">
+    @if (Definition.Content != null)
+    {
+        @foreach (var item in Definition.Content)
+        {
+            <MudSelectItem Value="@item.Value">@(item.DisplayText ?? item.Value)</MudSelectItem>
+        }
+    }
+</MudSelect>
+@if (!string.IsNullOrEmpty(Definition.Description))
+{
+    <MudText Typo="Typo.caption" Class="mt-n1 mb-2" Style="color: var(--mud-palette-text-secondary);">@Definition.Description</MudText>
+}
+
+@code {
+    [Parameter] public OptionDefinition Definition { get; set; } = null!;
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private async Task OnValueChanged(string newValue)
+    {
+        await ValueChanged.InvokeAsync(newValue);
+    }
+}

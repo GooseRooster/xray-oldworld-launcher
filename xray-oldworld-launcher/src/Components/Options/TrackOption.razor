@@ -1,0 +1,36 @@
+@using XrayOldworldLauncher.Models.Options
+
+<MudStack Spacing="0" Class="mb-2">
+    <MudText Typo="Typo.body2">@Definition.Label</MudText>
+    @if (!string.IsNullOrEmpty(Definition.Description))
+    {
+        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">@Definition.Description</MudText>
+    }
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+        <MudSlider T="double"
+                   Value="@_numericValue"
+                   ValueChanged="OnValueChanged"
+                   Min="@(Definition.Min ?? 0)"
+                   Max="@(Definition.Max ?? 100)"
+                   Step="@(Definition.Step ?? 1)"
+                   Color="Color.Primary"
+                   Style="flex: 1;" />
+        <MudText Typo="Typo.body2" Style="min-width: 50px; text-align: right;">
+            @_numericValue.ToString($"F{Definition.Precision}")
+        </MudText>
+    </MudStack>
+</MudStack>
+
+@code {
+    [Parameter] public OptionDefinition Definition { get; set; } = null!;
+    [Parameter] public string Value { get; set; } = "0";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private double _numericValue => double.TryParse(Value, System.Globalization.NumberStyles.Any,
+        System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : 0;
+
+    private async Task OnValueChanged(double newValue)
+    {
+        await ValueChanged.InvokeAsync(newValue.ToString(System.Globalization.CultureInfo.InvariantCulture));
+    }
+}

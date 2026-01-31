@@ -1,0 +1,33 @@
+@using XrayOldworldLauncher.Models.Options
+
+@switch (Definition.Type)
+{
+    case OptionType.Check:
+        <CheckOption Definition="@Definition" Value="@Value" ValueChanged="@ValueChanged" />
+        break;
+    case OptionType.Track:
+        <TrackOption Definition="@Definition" Value="@Value" ValueChanged="@ValueChanged" />
+        break;
+    case OptionType.List:
+        <ListOption Definition="@Definition" Value="@Value" ValueChanged="@ValueChanged" />
+        break;
+    case OptionType.RadioH:
+    case OptionType.RadioV:
+        <RadioOption Definition="@Definition" Value="@Value" ValueChanged="@ValueChanged" />
+        break;
+    case OptionType.Input:
+        <InputOption Definition="@Definition" Value="@Value" ValueChanged="@ValueChanged" />
+        break;
+    case OptionType.Line:
+        <MudDivider Class="my-3" />
+        break;
+    case OptionType.Title:
+        <MudText Typo="Typo.subtitle1" Class="mt-3 mb-1" Style="color: var(--mud-palette-primary);">@Definition.Label</MudText>
+        break;
+}
+
+@code {
+    [Parameter] public OptionDefinition Definition { get; set; } = null!;
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+}

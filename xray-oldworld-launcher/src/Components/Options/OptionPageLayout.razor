@@ -1,0 +1,115 @@
+@using XrayOldworldLauncher.Models.Options
+@using XrayOldworldLauncher.Services
+
+@inject OptionsStateService StateService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@implements IDisposable
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-4">
+    @if (!StateService.IsInitialized)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-4">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudText Typo="Typo.body1" Class="ml-3">Loading options...</MudText>
+        </MudStack>
+    }
+    else
+    {
+        @foreach (var group in Page.Groups)
+        {
+            <OptionFormGroup Group="@group" PageId="@Page.Id" />
+        }
+
+        <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="mt-2 mb-4">
+            <MudButton Variant="Variant.Outlined" Color="Color.Warning"
+                       OnClick="ResetToDefaults" Disabled="@_busy"
+                       StartIcon="@Icons.Material.Filled.RestartAlt">
+                Reset to Defaults
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       OnClick="Save" Disabled="@(!StateService.HasPendingChanges || _busy)"
+                       StartIcon="@Icons.Material.Filled.Save">
+                @if (_saving)
+                {
+                    <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" Class="mr-1" />
+                    <span>Saving...</span>
+                }
+                else
+                {
+                    <span>Save</span>
+                }
+            </MudButton>
+        </MudStack>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public OptionPage Page { get; set; } = null!;
+
+    private bool _saving;
+    private bool _resetting;
+    private bool _busy => _saving || _resetting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await StateService.InitializeAsync();
+        StateService.OnStateChanged += OnStateChanged;
+    }
+
+    private async Task Save()
+    {
+        _saving = true;
+        try
+        {
+            await StateService.SaveAllAsync();
+            Snackbar.Add("Options saved successfully.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to save options: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task ResetToDefaults()
+    {
+        var parameters = new DialogParameters<ConfirmDialog>
+        {
+            { x => x.ContentText, $"This will reset all {Page.Label} options to their default values. Any unsaved changes will be discarded. Continue?" },
+            { x => x.ButtonText, "Reset" },
+            { x => x.Color, Color.Warning }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<ConfirmDialog>("Reset to Defaults", parameters, options);
+        var result = await dialog.Result;
+
+        if (result == null || result.Canceled) return;
+
+        _resetting = true;
+        try
+        {
+            await StateService.ResetToDefaultsAsync(Page);
+            Snackbar.Add($"{Page.Label} options reset to defaults.", Severity.Info);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to reset options: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _resetting = false;
+        }
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        StateService.OnStateChanged -= OnStateChanged;
+    }
+}

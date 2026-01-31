@@ -1,0 +1,45 @@
+@using XrayOldworldLauncher.Models.Options
+
+<MudStack Spacing="0" Class="mb-2">
+    <MudText Typo="Typo.body2">@Definition.Label</MudText>
+    @if (!string.IsNullOrEmpty(Definition.Description))
+    {
+        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">@Definition.Description</MudText>
+    }
+    <MudRadioGroup T="string" Value="@Value" ValueChanged="OnValueChanged">
+        @if (Definition.Content != null)
+        {
+            @if (Definition.Type == OptionType.RadioH)
+            {
+                <MudStack Row="true" Spacing="2">
+                    @foreach (var item in Definition.Content)
+                    {
+                        <MudRadio Value="@item.Value" Color="Color.Primary" Dense="true">
+                            @(item.DisplayText ?? item.Value)
+                        </MudRadio>
+                    }
+                </MudStack>
+            }
+            else
+            {
+                @foreach (var item in Definition.Content)
+                {
+                    <MudRadio Value="@item.Value" Color="Color.Primary" Dense="true">
+                        @(item.DisplayText ?? item.Value)
+                    </MudRadio>
+                }
+            }
+        }
+    </MudRadioGroup>
+</MudStack>
+
+@code {
+    [Parameter] public OptionDefinition Definition { get; set; } = null!;
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private async Task OnValueChanged(string newValue)
+    {
+        await ValueChanged.InvokeAsync(newValue);
+    }
+}

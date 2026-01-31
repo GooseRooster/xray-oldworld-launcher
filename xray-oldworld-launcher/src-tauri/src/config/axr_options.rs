@@ -11,6 +11,7 @@ pub struct AxrOptions {
     ltx: LtxFile,
 }
 
+#[allow(dead_code)]
 impl AxrOptions {
     /// Load axr_options.ltx from {game_root}/gamedata/configs/axr_options.ltx.
     /// Returns empty state if file doesn't exist (first launch).

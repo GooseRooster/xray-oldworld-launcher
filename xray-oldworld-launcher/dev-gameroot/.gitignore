@@ -1,0 +1,6 @@
+# Ignore config files that get written during dev testing,
+# but keep the directory structure and stubs via .gitkeep
+gamedata/configs/axr_options.ltx
+appdata/user.ltx
+launcher_config.json
+appdata/shaders_cache/

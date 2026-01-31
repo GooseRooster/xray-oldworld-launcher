@@ -18,6 +18,7 @@ enum UserLtxEntry {
     Empty,
 }
 
+#[allow(dead_code)]
 impl UserLtx {
     pub fn new() -> Self {
         UserLtx {

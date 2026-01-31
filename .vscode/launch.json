@@ -12,6 +12,10 @@
           "--no-default-features"
         ]
       },
+      "env": {
+        "OWL_GAME_ROOT": "${workspaceFolder}/xray-oldworld-launcher/dev-gameroot",
+        "OWL_DEFAULTS_GAMEDATA": "/home/gooze/Modding/S.T.A.L.K.E.R. Mods/OWA - DEV/oldworld/OWA Build 153/OWA 00. Base files/gamedata"
+      },
       "preLaunchTask": "dotnet-watch",
       "postDebugTask": "kill-dotnet-watch"
     }

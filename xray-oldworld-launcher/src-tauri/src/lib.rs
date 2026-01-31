@@ -84,12 +84,6 @@ enum OptionStorage {
 
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct ResetRequest {
-    options: Vec<ResetOption>,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-#[serde(rename_all = "camelCase")]
 struct ResetOption {
     path: String,
     default_value: String,

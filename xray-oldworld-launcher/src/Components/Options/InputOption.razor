@@ -1,0 +1,22 @@
+@using XrayOldworldLauncher.Models.Options
+
+<MudTextField T="string"
+              Value="@Value"
+              ValueChanged="OnValueChanged"
+              Label="@Definition.Label"
+              HelperText="@Definition.Description"
+              Variant="Variant.Outlined"
+              Margin="Margin.Dense"
+              InputType="@(Definition.ValueType == OptionValueType.Float ? InputType.Number : InputType.Text)"
+              Class="mb-2" />
+
+@code {
+    [Parameter] public OptionDefinition Definition { get; set; } = null!;
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private async Task OnValueChanged(string newValue)
+    {
+        await ValueChanged.InvokeAsync(newValue);
+    }
+}

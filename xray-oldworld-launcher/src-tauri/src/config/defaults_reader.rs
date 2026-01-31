@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::config::ltx_parser::LtxFile;
 
@@ -8,11 +8,21 @@ pub struct DefaultsReader {
     ltx: LtxFile,
 }
 
+#[allow(dead_code)]
 impl DefaultsReader {
     /// Load all defaults by parsing the master includes.ltx file,
     /// which in turn #includes all defaults_*.ltx files via wildcard.
+    ///
+    /// If `OWL_DEFAULTS_GAMEDATA` is set, defaults are loaded from that
+    /// gamedata path instead. This allows dev setups where the dummy game
+    /// root has no defaults files but the real mod repo does.
     pub fn load(gamedata_path: &Path) -> Result<Self, String> {
-        let includes_path = gamedata_path
+        let effective_gamedata = std::env::var("OWL_DEFAULTS_GAMEDATA")
+            .ok()
+            .map(PathBuf::from)
+            .unwrap_or_else(|| gamedata_path.to_path_buf());
+
+        let includes_path = effective_gamedata
             .join("configs")
             .join("plugins")
             .join("defaults")

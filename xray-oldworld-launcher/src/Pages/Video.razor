@@ -1,9 +1,9 @@
 @page "/video"
-@inject IJSRuntime JsRuntime
+@using XrayOldworldLauncher.OptionDefinitions
 
-
+<OptionPageLayout Page="@_page" />
 
 @code
 {
-   
+    private readonly OptionPage _page = VideoPageDefinition.Build();
 }

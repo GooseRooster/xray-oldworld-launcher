@@ -4,6 +4,7 @@
   "scripts": {
     "tauri": "tauri",
     "dev": "tauri dev",
+    "dev:env": "./dev.sh",
     "build": "tauri build"
   },
   "devDependencies": {
