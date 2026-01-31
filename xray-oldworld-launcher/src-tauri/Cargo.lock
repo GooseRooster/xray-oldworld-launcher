@@ -4934,6 +4934,8 @@ dependencies = [
 name = "xray-oldworld-launcher"
 version = "0.1.0"
 dependencies = [
+ "glob",
+ "indexmap 2.13.0",
  "serde",
  "serde_json",
  "tauri",
