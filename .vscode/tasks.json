@@ -20,6 +20,15 @@
           "endsPattern": "Now listening on:"
         }
       }
+    },
+    {
+      "label": "kill-dotnet-watch",
+      "type": "shell",
+      "command": "pkill -f 'dotnet watch run --project src/XrayOldworldLauncher.csproj' || true",
+      "presentation": {
+        "reveal": "silent",
+        "close": true
+      }
     }
   ]
 }

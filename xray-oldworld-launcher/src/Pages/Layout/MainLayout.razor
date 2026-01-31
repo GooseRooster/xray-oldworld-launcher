@@ -1,18 +1,58 @@
 @inherits LayoutComponentBase
 
-<MudThemeProvider/>
+<MudThemeProvider Theme="oldWorldTheme" IsDarkMode="true"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
+
+@* Zone atmospheric background - renders behind everything *@
+<ZoneBackground BackgroundImageUrl="/assets/background.jpg" RainDropCount="30" />
 <MudLayout>
-    <MudAppBar>
+
+    <MudAppBar Color="Color.Surface" Elevation="0" Style="background-color: rgba(58, 58, 50, 0.85); backdrop-filter: blur(8px);">
         XRAY Monolith: Old World Edition
     </MudAppBar>
-    <MudDrawer Open="true">
-
+    <MudDrawer Open="true" Color="Color.Surface" Elevation="0" Style="background-color: rgba(58, 58, 50, 0.9); backdrop-filter: blur(10px);">
+        <MudNavMenu>
+            <MudNavLink Href="/" Icon="@ZoneIcons.Radiation">
+                Main
+            </MudNavLink>
+            <MudNavLink Href="/video" Icon="@ZoneIcons.Video">
+                Video
+            </MudNavLink>
+            <MudNavLink Href="/sound" Icon="@ZoneIcons.Sound">
+                Sound
+            </MudNavLink>
+            <MudNavLink Href="/gameplay" Icon="@ZoneIcons.Gameplay">
+                Gameplay
+            </MudNavLink>
+            <MudNavLink Href="/thezone" Icon="@ZoneIcons.Anomaly">
+                The Zone
+            </MudNavLink>
+            <MudNavLink Href="/control" Icon="@ZoneIcons.Controls">
+                Control
+            </MudNavLink>
+        </MudNavMenu>
     </MudDrawer>
-    <MudMainContent>
+    <MudMainContent Style="background-color: transparent;">
+        
         @Body
     </MudMainContent>
 </MudLayout>
+
+@code {
+    MudTheme oldWorldTheme = new MudTheme() {
+        PaletteDark = new PaletteDark() {
+            Primary = "#6B7556",
+            Secondary = "#C87941",
+            Background = "#242420",
+            Surface = "#3A3A32",
+            Info = "#4A6B72",
+            Warning = "#CC8844",
+            Error = "#8B4A42",
+            TextPrimary = "#D4D4C8",
+            TextSecondary = "#8B8B7E"
+        }
+    };
+}

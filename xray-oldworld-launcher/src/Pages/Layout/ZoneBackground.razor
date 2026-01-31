@@ -1,0 +1,38 @@
+@* Zone atmospheric background with rain and fog effects *@
+
+<div class="zone-background">
+    <div class="zone-background-image" style="background-image: url('@BackgroundImageUrl');"></div>
+    
+    @* Fog layers *@
+    <div class="zone-fog zone-fog-1"></div>
+    <div class="zone-fog zone-fog-2"></div>
+    
+    @* Rain container *@
+    <div class="zone-rain-container">
+        @for (int i = 0; i < RainDropCount; i++)
+        {
+            <div class="zone-rain-drop" style="@GetRainDropStyle(i)"></div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string BackgroundImageUrl { get; set; } = "";
+    
+    [Parameter]
+    public int RainDropCount { get; set; } = 30;
+    
+    private Random _random = new Random(42); // Seeded for consistent layout
+    
+    private string GetRainDropStyle(int index)
+    {
+        var left = _random.Next(0, 100);
+        var duration = 0.8 + (_random.NextDouble() * 0.8); // 0.8-1.6s
+        var delay = _random.NextDouble() * 2; // 0-2s
+        var opacity = 0.2 + (_random.NextDouble() * 0.3); // 0.2-0.5
+        var height = 60 + _random.Next(0, 40); // 60-100px
+        
+        return $"left: {left}%; animation-duration: {duration:F2}s; animation-delay: {delay:F2}s; opacity: {opacity:F2}; height: {height}px;";
+    }
+}

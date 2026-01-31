@@ -12,7 +12,8 @@
           "--no-default-features"
         ]
       },
-      "preLaunchTask": "dotnet-watch"
+      "preLaunchTask": "dotnet-watch",
+      "postDebugTask": "kill-dotnet-watch"
     }
   ]
 }

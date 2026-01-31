@@ -1,0 +1,129 @@
+/* Zone Background Layer System */
+.zone-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Background Image Layer */
+.zone-background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: brightness(0.7) saturate(0.8);
+}
+
+/* Fog Layers */
+.zone-fog {
+    position: absolute;
+    width: 200%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, 
+        transparent 0%, 
+        rgba(107, 117, 86, 0.08) 30%,
+        rgba(107, 117, 86, 0.15) 60%,
+        rgba(58, 58, 50, 0.25) 100%);
+    will-change: transform;
+}
+
+.zone-fog-1 {
+    animation: zone-drift-1 25s ease-in-out infinite;
+    opacity: 0.6;
+}
+
+.zone-fog-2 {
+    animation: zone-drift-2 30s ease-in-out infinite;
+    animation-delay: -10s;
+    opacity: 0.4;
+    background: radial-gradient(ellipse at 70% 50%, 
+        transparent 0%, 
+        rgba(74, 107, 114, 0.1) 40%,
+        rgba(58, 58, 50, 0.2) 100%);
+}
+
+@keyframes zone-drift-1 {
+    0%, 100% { 
+        transform: translateX(-30%) translateY(0); 
+    }
+    50% { 
+        transform: translateX(-10%) translateY(-5%); 
+    }
+}
+
+@keyframes zone-drift-2 {
+    0%, 100% { 
+        transform: translateX(-20%) translateY(2%); 
+    }
+    50% { 
+        transform: translateX(-35%) translateY(-3%); 
+    }
+}
+
+/* Rain System */
+.zone-rain-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.zone-rain-drop {
+    position: absolute;
+    top: -100px;
+    width: 1px;
+    background: linear-gradient(to bottom,
+        transparent 0%,
+        rgba(212, 165, 116, 0.4) 30%,
+        rgba(212, 165, 116, 0.6) 50%,
+        rgba(212, 165, 116, 0.4) 70%,
+        transparent 100%);
+    animation: zone-rain-fall linear infinite;
+    filter: drop-shadow(0 0 1px rgba(212, 165, 116, 0.3));
+}
+
+@keyframes zone-rain-fall {
+    to { 
+        transform: translateY(calc(100vh + 100px)); 
+    }
+}
+
+/* Subtle vignette overlay for depth */
+.zone-background::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center,
+        transparent 0%,
+        rgba(26, 26, 22, 0.3) 100%);
+    pointer-events: none;
+}
+
+/* Performance optimizations */
+.zone-rain-drop,
+.zone-fog {
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .zone-rain-drop,
+    .zone-fog {
+        animation: none !important;
+    }
+}
