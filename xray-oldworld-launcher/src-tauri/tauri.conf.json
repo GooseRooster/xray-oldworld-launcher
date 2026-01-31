@@ -5,7 +5,7 @@
   "identifier": "com.gooze.xray-oldworld-launcher",
   "build": {
     "beforeDevCommand": "dotnet watch run --project src/XrayOldworldLauncher.csproj",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:5000",
     "beforeBuildCommand": "dotnet publish -c release src/XrayOldworldLauncher.csproj -o dist",
     "frontendDist": "../dist/wwwroot"
   },

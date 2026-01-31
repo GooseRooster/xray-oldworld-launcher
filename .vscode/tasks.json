@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dotnet-watch",
+      "type": "shell",
+      "command": "dotnet watch run --project src/XrayOldworldLauncher.csproj",
+      "options": {
+        "cwd": "${workspaceFolder}/xray-oldworld-launcher"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet-watch",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*dotnet watch.*$",
+          "endsPattern": "Now listening on:"
+        }
+      }
+    }
+  ]
+}
