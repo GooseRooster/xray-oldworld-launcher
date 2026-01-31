@@ -7,16 +7,7 @@
 @implements IDisposable
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="py-4" Style="background-color: transparent;">
-    @if (!StateService.IsInitialized)
-    {
-        <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-4">
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-            <MudText Typo="Typo.body1" Class="ml-3">Loading options...</MudText>
-        </MudStack>
-    }
-    else
-    {
-        <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="mt-2 mb-4">
+      <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="mt-2 mb-4">
             <MudButton Variant="Variant.Outlined" Color="Color.Warning"
                        OnClick="ResetToDefaults" Disabled="@_busy"
                        StartIcon="@Icons.Material.Filled.RestartAlt">
@@ -41,9 +32,6 @@
         {
             <OptionFormGroup Group="@group" PageId="@Page.Id" />
         }
-
-       
-    }
 </MudContainer>
 
 @code {
@@ -55,7 +43,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await StateService.InitializeAsync();
         StateService.OnStateChanged += OnStateChanged;
     }
 

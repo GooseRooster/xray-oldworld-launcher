@@ -1,5 +1,7 @@
 using TauriApi;
 using XrayOldworldLauncher.Models.Options;
+using XrayOldworldLauncher.OptionDefinitions;
+using MudBlazor;
 
 namespace XrayOldworldLauncher.Services;
 
@@ -10,46 +12,52 @@ namespace XrayOldworldLauncher.Services;
 public class OptionsStateService
 {
     private readonly Tauri _tauri;
-    private bool _initialized;
 
-    /// Current values from axr_options.ltx [options] section
-    public Dictionary<string, string> AxrValues { get; private set; } = new();
+    /// All known option definitions that have a console command, with page/group context.
+    private readonly List<(OptionDefinition Opt, string PageId, string GroupId)> _allCmdOptions;
 
     /// Current values from user.ltx (console commands)
     public Dictionary<string, string> CmdValues { get; private set; } = new();
 
-    /// Default values from gamedata/configs/plugins/defaults/
-    public Dictionary<string, Dictionary<string, string>> Defaults { get; private set; } = new();
 
     /// Pending unsaved changes keyed by full option path
     public Dictionary<string, OptionChange> PendingChanges { get; } = new();
 
     public bool HasPendingChanges => PendingChanges.Count > 0;
-    public bool IsInitialized => _initialized;
 
     public event Action? OnStateChanged;
 
     public OptionsStateService(Tauri tauri)
     {
         _tauri = tauri;
+        _allCmdOptions = BuildAllCmdOptions();
     }
 
-    /// Load defaults and current values from the backend.
-    public async Task InitializeAsync()
+    /// Collect every option definition with a console command from all page definitions.
+    private static List<(OptionDefinition Opt, string PageId, string GroupId)> BuildAllCmdOptions()
     {
-        if (_initialized) return;
+        var pages = new[]
+        {
+            VideoPageDefinition.Build(),
+            SoundPageDefinition.Build(),
+            ControlPageDefinition.Build(),
+        };
 
-        try
+        var result = new List<(OptionDefinition, string, string)>();
+        foreach (var page in pages)
         {
-            Defaults = await _tauri.Core.Invoke<Dictionary<string, Dictionary<string, string>>>("get_all_defaults") ?? new();
-            await RefreshCurrentValuesAsync();
-            _initialized = true;
+            foreach (var group in page.Groups)
+            {
+                foreach (var opt in group.Options)
+                {
+                    if (opt.ConsoleCommand != null && opt.Type is not (OptionType.Line or OptionType.Title))
+                        result.Add((opt, page.Id, group.Id));
+                }
+            }
         }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Failed to initialize options: {ex.Message}");
-        }
+        return result;
     }
+
 
     /// Reload current values from config files.
     public async Task RefreshCurrentValuesAsync()
@@ -59,7 +67,6 @@ public class OptionsStateService
             var state = await _tauri.Core.Invoke<OptionsState>("get_options");
             if (state != null)
             {
-                AxrValues = state.AxrOptions;
                 CmdValues = state.UserLtx;
             }
         }
@@ -85,19 +92,8 @@ public class OptionsStateService
             if (CmdValues.TryGetValue(opt.ConsoleCommand, out var cmdVal))
                 return NormalizeBoolValue(cmdVal, opt);
         }
-        else
-        {
-            if (AxrValues.TryGetValue(fullPath, out var axrVal))
-                return axrVal;
-        }
-
-        // 3. Check defaults from LTX
-        var defaultsSection = $"{pageId}_{groupId}";
-        if (Defaults.TryGetValue(defaultsSection, out var sectionDefaults)
-            && sectionDefaults.TryGetValue(opt.Id, out var defVal))
-            return defVal;
-
-        // 4. Hardcoded default from C# definition
+        
+        // 3. Hardcoded default from C# definition
         return opt.DefaultValue;
     }
 
@@ -106,27 +102,45 @@ public class OptionsStateService
     {
         var fullPath = $"{pageId}/{groupId}/{opt.Id}";
 
-        OptionChange change;
+        OptionChange change = new();
         if (opt.ConsoleCommand != null)
         {
             var formattedValue = FormatValueForUserLtx(value, opt);
             change = OptionChange.ForUserLtx(opt.ConsoleCommand, formattedValue);
         }
-        else
-        {
-            change = OptionChange.ForAxrOptions(fullPath, value);
-        }
+      
 
         PendingChanges[fullPath] = change;
         OnStateChanged?.Invoke();
     }
 
     /// Save all pending changes to the backend.
+    /// Also writes default values for any options missing from user.ltx,
+    /// ensuring deleted/missing config entries are restored.
     public async Task SaveAllAsync()
     {
         if (!HasPendingChanges) return;
 
-        var changes = PendingChanges.Values.ToList();
+        // Console commands the user is explicitly changing
+        var pendingCmds = new HashSet<string>(
+            PendingChanges.Values
+                .Where(c => c.Cmd != null)
+                .Select(c => c.Cmd!));
+
+        // Fill in defaults for any options missing from user.ltx
+        var changes = new List<OptionChange>();
+        foreach (var (opt, _, _) in _allCmdOptions)
+        {
+            if (!CmdValues.ContainsKey(opt.ConsoleCommand!) && !pendingCmds.Contains(opt.ConsoleCommand!))
+            {
+                var defaultValue = FormatValueForUserLtx(opt.DefaultValue, opt);
+                changes.Add(OptionChange.ForUserLtx(opt.ConsoleCommand!, defaultValue));
+            }
+        }
+
+        // User's pending changes come after so they override any matching defaults
+        changes.AddRange(PendingChanges.Values);
+
         await _tauri.Core.Invoke("save_options", new { changes });
 
         PendingChanges.Clear();
@@ -193,10 +207,6 @@ public class OptionsStateService
 
     private string GetDefaultValue(OptionDefinition opt, string pageId, string groupId)
     {
-        var defaultsSection = $"{pageId}_{groupId}";
-        if (Defaults.TryGetValue(defaultsSection, out var sectionDefaults)
-            && sectionDefaults.TryGetValue(opt.Id, out var defVal))
-            return defVal;
 
         return opt.DefaultValue;
     }

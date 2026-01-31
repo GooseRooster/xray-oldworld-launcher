@@ -4,8 +4,6 @@ mod game;
 use std::collections::HashMap;
 use std::sync::RwLock;
 
-use config::axr_options::AxrOptions;
-use config::defaults_reader::DefaultsReader;
 use config::launcher_config::LauncherConfig;
 use config::user_ltx::UserLtx;
 use game::paths::GamePaths;
@@ -59,7 +57,6 @@ impl AppState {
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct OptionsState {
-    axr_options: HashMap<String, String>,
     user_ltx: HashMap<String, String>,
 }
 
@@ -76,8 +73,6 @@ struct OptionChange {
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "storageType")]
 enum OptionStorage {
-    #[serde(rename = "axrOptions")]
-    AxrOptions,
     #[serde(rename = "userLtx")]
     UserLtx { cmd: String },
 }
@@ -98,22 +93,15 @@ fn get_game_paths(state: tauri::State<'_, AppState>) -> Result<GamePaths, String
     state.get_paths()
 }
 
-#[tauri::command]
-fn get_all_defaults(state: tauri::State<'_, AppState>) -> Result<HashMap<String, HashMap<String, String>>, String> {
-    let paths = state.get_paths()?;
-    let reader = DefaultsReader::load(&paths.gamedata)?;
-    Ok(reader.get_all_defaults())
-}
+
 
 #[tauri::command]
 fn get_options(state: tauri::State<'_, AppState>) -> Result<OptionsState, String> {
     let paths = state.get_paths()?;
 
-    let axr = AxrOptions::load(&paths.gamedata);
     let user = UserLtx::load(&paths.appdata);
 
     Ok(OptionsState {
-        axr_options: axr.get_all_options(),
         user_ltx: user.get_all(),
     })
 }
@@ -125,17 +113,11 @@ fn save_options(
 ) -> Result<(), String> {
     let paths = state.get_paths()?;
 
-    let mut axr = AxrOptions::load(&paths.gamedata);
     let mut user = UserLtx::load(&paths.appdata);
-    let mut axr_dirty = false;
     let mut user_dirty = false;
 
     for change in changes {
         match change.storage {
-            OptionStorage::AxrOptions => {
-                axr.set(&change.path, &change.value);
-                axr_dirty = true;
-            }
             OptionStorage::UserLtx { cmd } => {
                 user.set(&cmd, &change.value);
                 user_dirty = true;
@@ -143,9 +125,7 @@ fn save_options(
         }
     }
 
-    if axr_dirty {
-        axr.save(&paths.gamedata)?;
-    }
+
     if user_dirty {
         user.save(&paths.appdata)?;
     }
@@ -153,40 +133,6 @@ fn save_options(
     Ok(())
 }
 
-#[tauri::command]
-fn reset_options_to_defaults(
-    options: Vec<ResetOption>,
-    state: tauri::State<'_, AppState>,
-) -> Result<(), String> {
-    let paths = state.get_paths()?;
-
-    let mut axr = AxrOptions::load(&paths.gamedata);
-    let mut user = UserLtx::load(&paths.appdata);
-    let mut axr_dirty = false;
-    let mut user_dirty = false;
-
-    for opt in options {
-        match opt.storage {
-            OptionStorage::AxrOptions => {
-                axr.set(&opt.path, &opt.default_value);
-                axr_dirty = true;
-            }
-            OptionStorage::UserLtx { cmd } => {
-                user.set(&cmd, &opt.default_value);
-                user_dirty = true;
-            }
-        }
-    }
-
-    if axr_dirty {
-        axr.save(&paths.gamedata)?;
-    }
-    if user_dirty {
-        user.save(&paths.appdata)?;
-    }
-
-    Ok(())
-}
 
 #[tauri::command]
 fn get_launcher_config(state: tauri::State<'_, AppState>) -> Result<LauncherConfig, String> {
@@ -249,10 +195,8 @@ pub fn run() {
         .manage(app_state)
         .invoke_handler(tauri::generate_handler![
             get_game_paths,
-            get_all_defaults,
             get_options,
             save_options,
-            reset_options_to_defaults,
             get_launcher_config,
             save_launcher_config,
             launch_game,

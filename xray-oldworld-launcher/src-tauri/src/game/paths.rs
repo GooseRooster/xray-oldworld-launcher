@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 pub struct GamePaths {
     pub game_root: PathBuf,
     pub appdata: PathBuf,
-    pub gamedata: PathBuf,
     pub bin: PathBuf,
     pub launcher_dir: PathBuf,
 }
@@ -16,19 +15,16 @@ impl GamePaths {
     ///
     /// Priority for game_root:
     /// 1. `OWL_GAME_ROOT` environment variable (for dev/testing)
-    /// 2. `config_game_root` parameter (from launcher_config.json)
     /// 3. Relative to launcher executable (parent directory)
     pub fn resolve(config_game_root: Option<&str>) -> Result<Self, String> {
         let launcher_dir = Self::get_launcher_dir()?;
         let game_root = Self::resolve_game_root(config_game_root, &launcher_dir)?;
         let appdata = Self::resolve_appdata(&game_root);
-        let gamedata = game_root.join("gamedata");
         let bin = game_root.join("bin");
 
         Ok(GamePaths {
             game_root,
             appdata,
-            gamedata,
             bin,
             launcher_dir,
         })
@@ -96,10 +92,7 @@ impl GamePaths {
         if local_appdata.is_dir() {
             return local_appdata;
         }
-        // Fallback: try platform-standard location
-        // On Windows, Anomaly typically uses %APPDATA%/Stalker-COP or similar,
-        // but the portable appdata/ inside game root is most common for modded installs.
-        // Default to the local path even if it doesn't exist yet (it will be created).
+
         local_appdata
     }
 }
