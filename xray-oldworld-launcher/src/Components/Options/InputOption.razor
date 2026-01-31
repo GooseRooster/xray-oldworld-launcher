@@ -1,16 +1,19 @@
 @using XrayOldworldLauncher.Models.Options
+@using XrayOldworldLauncher.Services
+@inject LocalizationService Loc
 
 <MudTextField T="string"
               Value="@Value"
               ValueChanged="OnValueChanged"
-              Label="@Definition.Label"
-              HelperText="@Definition.Description"
+              Label="@Loc.T($"opt.{Definition.Id}")"
+              HelperText="@Loc.TryGet($"opt.{Definition.Id}.desc")"
               Variant="Variant.Outlined"
               Margin="Margin.Dense"
               InputType="@(Definition.ValueType == OptionValueType.Float ? InputType.Number : InputType.Text)"
               Class="mb-2" />
 
 @code {
+    [CascadingParameter(Name = "Language")] public string? Language { get; set; }
     [Parameter] public OptionDefinition Definition { get; set; } = null!;
     [Parameter] public string Value { get; set; } = "";
     [Parameter] public EventCallback<string> ValueChanged { get; set; }

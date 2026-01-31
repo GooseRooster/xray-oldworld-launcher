@@ -14,5 +14,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddTauriApi();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<OptionsStateService>();
+builder.Services.AddScoped<LocalizationService>();
 
 await builder.Build().RunAsync();

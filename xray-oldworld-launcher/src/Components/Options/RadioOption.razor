@@ -1,10 +1,13 @@
 @using XrayOldworldLauncher.Models.Options
+@using XrayOldworldLauncher.Services
+@inject LocalizationService Loc
 
 <MudStack Spacing="0" Class="mb-2">
-    <MudText Typo="Typo.body2">@Definition.Label</MudText>
-    @if (!string.IsNullOrEmpty(Definition.Description))
+    <MudText Typo="Typo.body2">@Loc.T($"opt.{Definition.Id}")</MudText>
+    @{ var desc = Loc.TryGet($"opt.{Definition.Id}.desc"); }
+    @if (desc != null)
     {
-        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">@Definition.Description</MudText>
+        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">@desc</MudText>
     }
     <MudRadioGroup T="string" Value="@Value" ValueChanged="OnValueChanged">
         @if (Definition.Content != null)
@@ -14,8 +17,8 @@
                 <MudStack Row="true" Spacing="2">
                     @foreach (var item in Definition.Content)
                     {
-                        <MudRadio Value="@item.Value" Color="Color.Primary" Dense="true">
-                            @(item.DisplayText ?? item.Value)
+                        <MudRadio Value="@item" Color="Color.Primary" Dense="true">
+                            @Loc.ContentText(Definition.Id, item)
                         </MudRadio>
                     }
                 </MudStack>
@@ -24,8 +27,8 @@
             {
                 @foreach (var item in Definition.Content)
                 {
-                    <MudRadio Value="@item.Value" Color="Color.Primary" Dense="true">
-                        @(item.DisplayText ?? item.Value)
+                    <MudRadio Value="@item" Color="Color.Primary" Dense="true">
+                        @Loc.ContentText(Definition.Id, item)
                     </MudRadio>
                 }
             }
@@ -34,6 +37,7 @@
 </MudStack>
 
 @code {
+    [CascadingParameter(Name = "Language")] public string? Language { get; set; }
     [Parameter] public OptionDefinition Definition { get; set; } = null!;
     [Parameter] public string Value { get; set; } = "";
     [Parameter] public EventCallback<string> ValueChanged { get; set; }

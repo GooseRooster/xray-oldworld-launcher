@@ -18,4 +18,7 @@ public class LauncherConfig
 
     [JsonPropertyName("gameRoot")]
     public string? GameRoot { get; set; }
+
+    [JsonPropertyName("language")]
+    public string Language { get; set; } = "en";
 }

@@ -16,10 +16,16 @@ pub struct LauncherConfig {
     pub custom_args: String,
     #[serde(default)]
     pub game_root: Option<String>,
+    #[serde(default = "default_language")]
+    pub language: String,
 }
 
 fn default_shadow_map_size() -> u32 {
     2048
+}
+
+fn default_language() -> String {
+    "en".to_string()
 }
 
 impl Default for LauncherConfig {
@@ -30,6 +36,7 @@ impl Default for LauncherConfig {
             shadow_map_size: 2048,
             custom_args: String::new(),
             game_root: None,
+            language: default_language(),
         }
     }
 }

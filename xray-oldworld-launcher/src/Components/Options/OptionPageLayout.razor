@@ -2,6 +2,7 @@
 @using XrayOldworldLauncher.Services
 
 @inject OptionsStateService StateService
+@inject LocalizationService Loc
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 @implements IDisposable
@@ -11,7 +12,7 @@
             <MudButton Variant="Variant.Outlined" Color="Color.Warning"
                        OnClick="ResetToDefaults" Disabled="@_busy"
                        StartIcon="@Icons.Material.Filled.RestartAlt">
-                Reset to Defaults
+                @Loc.T("ui.reset_to_defaults")
             </MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary"
                        OnClick="Save" Disabled="@(!StateService.HasPendingChanges || _busy)"
@@ -19,11 +20,11 @@
                 @if (_saving)
                 {
                     <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" Class="mr-1" />
-                    <span>Saving...</span>
+                    <span>@Loc.T("ui.saving")</span>
                 }
                 else
                 {
-                    <span>Save</span>
+                    <span>@Loc.T("ui.save")</span>
                 }
             </MudButton>
         </MudStack>
@@ -35,6 +36,7 @@
 </MudContainer>
 
 @code {
+    [CascadingParameter(Name = "Language")] public string? Language { get; set; }
     [Parameter] public OptionPage Page { get; set; } = null!;
 
     private bool _saving;
@@ -52,11 +54,11 @@
         try
         {
             await StateService.SaveAllAsync();
-            Snackbar.Add("Options saved successfully.", Severity.Success);
+            Snackbar.Add(Loc.T("snackbar.options_saved"), Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to save options: {ex.Message}", Severity.Error);
+            Snackbar.Add(string.Format(Loc.T("snackbar.options_save_failed"), ex.Message), Severity.Error);
         }
         finally
         {
@@ -66,15 +68,16 @@
 
     private async Task ResetToDefaults()
     {
+        var pageName = Loc.T($"page.{Page.Id}");
         var parameters = new DialogParameters<ConfirmDialog>
         {
-            { x => x.ContentText, $"This will reset all {Page.Label} options to their default values. Any unsaved changes will be discarded. Continue?" },
-            { x => x.ButtonText, "Reset" },
+            { x => x.ContentText, string.Format(Loc.T("dialog.reset_options"), pageName) },
+            { x => x.ButtonText, Loc.T("ui.reset") },
             { x => x.Color, Color.Warning }
         };
 
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small };
-        var dialog = await DialogService.ShowAsync<ConfirmDialog>("Reset to Defaults", parameters, options);
+        var dialog = await DialogService.ShowAsync<ConfirmDialog>(Loc.T("ui.reset_to_defaults"), parameters, options);
         var result = await dialog.Result;
 
         if (result == null || result.Canceled) return;
@@ -83,11 +86,11 @@
         try
         {
             await StateService.ResetToDefaultsAsync(Page);
-            Snackbar.Add($"{Page.Label} options reset to defaults.", Severity.Info);
+            Snackbar.Add(string.Format(Loc.T("snackbar.reset_success"), pageName), Severity.Info);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to reset options: {ex.Message}", Severity.Error);
+            Snackbar.Add(string.Format(Loc.T("snackbar.reset_failed"), ex.Message), Severity.Error);
         }
         finally
         {

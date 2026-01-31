@@ -1,56 +1,84 @@
 @inherits LayoutComponentBase
+@using XrayOldworldLauncher.Models.Options
+@using XrayOldworldLauncher.Services
+@inject LocalizationService Loc
+@inject Tauri Tauri
+@implements IDisposable
 
 <MudThemeProvider Theme="clearSkyTheme" IsDarkMode="true"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
+@if (_initialized)
+{
+    @* Zone atmospheric background - renders behind everything *@
+    <ZoneBackground BackgroundImageUrl="/assets/background-alt.png" RainDropCount="30" />
+    <MudLayout>
 
-@* Zone atmospheric background - renders behind everything *@
-<ZoneBackground BackgroundImageUrl="/assets/background-alt.png" RainDropCount="30" />
-<MudLayout>
-
-    <MudAppBar Color="Color.Surface" Elevation="0">
-        XRAY Monolith: Old World Edition
-    </MudAppBar>
-    <MudDrawer Open="true" Color="Color.Surface" Elevation="0">
-        <MudNavMenu>
-            <MudNavLink Href="/" Match="@NavLinkMatch.All" Icon="@ZoneIcons.Radiation">
-                Main
-            </MudNavLink>
-            <MudNavLink Href="/video" Icon="@ZoneIcons.Video">
-                Video
-            </MudNavLink>
-            <MudNavLink Href="/sound" Icon="@ZoneIcons.Sound">
-                Sound
-            </MudNavLink>
-            @* <MudNavLink Href="/gameplay" Icon="@ZoneIcons.Gameplay">
-                Gameplay
-            </MudNavLink>
-            <MudNavLink Href="/thezone" Icon="@ZoneIcons.Anomaly">
-                The Zone
-            </MudNavLink> *@
-            <MudNavLink Href="/control" Icon="@ZoneIcons.Controls">
-                Control
-            </MudNavLink>
-        </MudNavMenu>
-    </MudDrawer>
-    <MudMainContent Style="background-color: transparent;">
-        <div class="content-panel">
-            @Body
-        </div>
-    </MudMainContent>
-</MudLayout>
+        <MudAppBar Color="Color.Surface" Class="zone-appbar noise-texture"
+                   Elevation="0"
+                   Style="background: rgba(58, 58, 50, 0.85); backdrop-filter: blur(8px);">
+            @Loc.T("app.title")
+            <MudSpacer />
+            <MudButtonGroup OverrideStyles="false" Size="MudBlazor.Size.Small" Variant="Variant.Text">
+                <MudButton OnClick="@(() => SetLanguage("en"))"
+                           Color="@(Loc.CurrentLanguage == "en" ? Color.Primary : Color.Default)"
+                           Variant="@(Loc.CurrentLanguage == "en" ? Variant.Filled : Variant.Text)"
+                           Size="MudBlazor.Size.Small">
+                    EN
+                </MudButton>
+                <MudButton OnClick="@(() => SetLanguage("ru"))"
+                           Color="@(Loc.CurrentLanguage == "ru" ? Color.Primary : Color.Default)"
+                           Variant="@(Loc.CurrentLanguage == "ru" ? Variant.Filled : Variant.Text)"
+                           Size="MudBlazor.Size.Small">
+                    RU
+                </MudButton>
+            </MudButtonGroup>
+        </MudAppBar>
+        <MudDrawer Open="true" Color="Color.Surface" Class="zone-drawer grimy-overlay"
+                   Elevation="0"
+                   Style="background: rgba(58, 58, 50, 0.9); backdrop-filter: blur(10px);">
+            <MudNavMenu>
+                <MudNavLink Class="metal-border" Href="/" Match="@NavLinkMatch.All" Icon="@ZoneIcons.Radiation">
+                    @Loc.T("nav.main")
+                </MudNavLink>
+                <MudNavLink Class="metal-border" Href="/video" Icon="@ZoneIcons.Video">
+                    @Loc.T("nav.video")
+                </MudNavLink>
+                <MudNavLink Class="metal-border" Href="/sound" Icon="@ZoneIcons.Sound">
+                    @Loc.T("nav.sound")
+                </MudNavLink>
+                <MudNavLink Class="metal-border" Href="/control" Icon="@ZoneIcons.Controls">
+                    @Loc.T("nav.control")
+                </MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+        <MudMainContent Style="background-color: transparent;">
+            <CascadingValue Value="@Loc.CurrentLanguage" Name="Language">
+                <div class="content-panel">
+                    @Body
+                </div>
+            </CascadingValue>
+        </MudMainContent>
+    </MudLayout>
+}
+else
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
 
 @code {
+    private bool _initialized;
+
     MudTheme clearSkyTheme = new MudTheme() {
-        PaletteDark = new PaletteDark() {
-            Primary = "#5A6B7D",        // Steel blue-gray 
-            Secondary = "#6B8E9D",      // Desaturated cyan-blue 
-            Background = "#1E2228",     // Cool dark gray 
+         PaletteDark = new PaletteDark() {
+            Primary = "#5A6B7D",        // Steel blue-gray
+            Secondary = "#6B8E9D",      // Desaturated cyan-blue
+            Background = "#1E2228",     // Cool dark gray
             Surface = "#2F353D",        // Cool slate gray
             Info = "#4A7B8C",           // Bright steel teal
-            Warning = "#9B8A6B",        // Muted brass/bronze 
+            Warning = "#9B8A6B",        // Muted brass/bronze
             Error = "#7A5456",          // Cool burgundy
             TextPrimary = "#D4D8DC",    // Cool off-white
             TextSecondary = "#8B9199"   // Cool medium gray
@@ -63,4 +91,48 @@
             }
         }
     };
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var config = await Tauri.Core.Invoke<LauncherConfig>("get_launcher_config");
+            var lang = config?.Language ?? "en";
+            await Loc.InitializeAsync(lang);
+        }
+        catch
+        {
+            await Loc.InitializeAsync("en");
+        }
+
+        Loc.OnLanguageChanged += OnLanguageChanged;
+        _initialized = true;
+    }
+
+    private async Task SetLanguage(string lang)
+    {
+        await Loc.SetLanguageAsync(lang);
+
+        // Persist language preference
+        try
+        {
+            var config = await Tauri.Core.Invoke<LauncherConfig>("get_launcher_config");
+            if (config != null)
+            {
+                config.Language = lang;
+                await Tauri.Core.Invoke("save_launcher_config", new { config });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to save language preference: {ex.Message}");
+        }
+    }
+
+    private void OnLanguageChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
 }

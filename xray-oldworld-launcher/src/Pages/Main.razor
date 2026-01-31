@@ -1,5 +1,7 @@
 @page "/"
+@using XrayOldworldLauncher.Services
 @inject Tauri Tauri
+@inject LocalizationService Loc
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 @implements IDisposable
@@ -17,41 +19,41 @@ else
 
         @* ── Launch Configuration ── *@
         <MudText Typo="Typo.h5" Class="mb-3" Style="color: var(--mud-palette-primary);">
-            Launch Configuration
+            @Loc.T("main.launch_config")
         </MudText>
 
         <div class="pa-4 mb-4">
             <MudGrid Spacing="3">
                 <MudItem xs="12" sm="6">
                     <MudSwitch T="bool"
-                               Label="Use AVX Executable"
+                               Label="@Loc.T("main.use_avx")"
                                Color="Color.Primary"
                                Value="@_config.UseAvx"
                                ValueChanged="@(v => OnConfigChanged(() => _config.UseAvx = v))" />
                     <MudText Typo="Typo.caption" Class="ml-12" Style="color: var(--mud-palette-text-secondary);">
-                        Use OldWorldDX11AVX.exe for CPUs with AVX support
+                        @Loc.T("main.use_avx.desc")
                     </MudText>
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudSwitch T="bool"
-                               Label="Debug Mode"
+                               Label="@Loc.T("main.debug_mode")"
                                Color="Color.Warning"
                                Value="@_config.DebugMode"
                                ValueChanged="@(v => OnConfigChanged(() => _config.DebugMode = v))" />
                     <MudText Typo="Typo.caption" Class="ml-12" Style="color: var(--mud-palette-text-secondary);">
-                        Launch with -dbg flag for debug logging
+                        @Loc.T("main.debug_mode.desc")
                     </MudText>
                 </MudItem>
 
                 <MudItem xs="12" sm="6">
                     <MudSelect T="int"
-                               Label="Shadow Map Size"
+                               Label="@Loc.T("main.shadow_map_size")"
                                Variant="Variant.Outlined"
                                Value="@_config.ShadowMapSize"
                                ValueChanged="@(v => OnConfigChanged(() => _config.ShadowMapSize = v))">
                         <MudSelectItem T="int" Value="1536">1536</MudSelectItem>
-                        <MudSelectItem T="int" Value="2048">2048 (Default)</MudSelectItem>
+                        <MudSelectItem T="int" Value="2048">2048 (@Loc.T("ui.default"))</MudSelectItem>
                         <MudSelectItem T="int" Value="2560">2560</MudSelectItem>
                         <MudSelectItem T="int" Value="3072">3072</MudSelectItem>
                         <MudSelectItem T="int" Value="4096">4096</MudSelectItem>
@@ -60,11 +62,11 @@ else
 
                 <MudItem xs="12" sm="6">
                     <MudTextField T="string"
-                                  Label="Custom Launch Arguments"
+                                  Label="@Loc.T("main.custom_args")"
                                   Variant="Variant.Outlined"
                                   Value="@_config.CustomArgs"
                                   ValueChanged="@(v => OnConfigChanged(() => _config.CustomArgs = v))"
-                                  Placeholder="e.g. -nointro -prefetch" />
+                                  Placeholder="@Loc.T("main.custom_args.placeholder")" />
                 </MudItem>
             </MudGrid>
         </div>
@@ -81,17 +83,17 @@ else
             @if (_launching)
             {
                 <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" Class="mr-2" />
-                <span>LAUNCHING...</span>
+                <span>@Loc.T("ui.launching")</span>
             }
             else
             {
-                <span>ENTER THE ZONE</span>
+                <span>@Loc.T("ui.enter_the_zone")</span>
             }
         </MudButton>
 
         @* ── Maintenance ── *@
         <MudText Typo="Typo.h5" Class="mb-3" Style="color: var(--mud-palette-primary);">
-            Maintenance
+            @Loc.T("main.maintenance")
         </MudText>
 
         <MudPaper Class="pa-4 mb-4" Style="background-color: rgba(58, 58, 50, 0.6);" Elevation="0">
@@ -105,15 +107,15 @@ else
                         @if (_clearingCache)
                         {
                             <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" Class="mr-2" />
-                            <span>Clearing...</span>
+                            <span>@Loc.T("ui.clearing")</span>
                         }
                         else
                         {
-                            <span>Clear Shader Cache</span>
+                            <span>@Loc.T("main.clear_shader_cache")</span>
                         }
                     </MudButton>
                     <MudText Typo="Typo.caption" Class="mt-1" Style="color: var(--mud-palette-text-secondary);">
-                        Delete compiled shaders. They will be rebuilt on next launch.
+                        @Loc.T("main.clear_shader_cache.desc")
                     </MudText>
                 </MudItem>
 
@@ -126,58 +128,29 @@ else
                         @if (_resettingUserLtx)
                         {
                             <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" Class="mr-2" />
-                            <span>Resetting...</span>
+                            <span>@Loc.T("ui.resetting")</span>
                         }
                         else
                         {
-                            <span>Reset user.ltx</span>
+                            <span>@Loc.T("main.reset_user_ltx")</span>
                         }
                     </MudButton>
                     <MudText Typo="Typo.caption" Class="mt-1" Style="color: var(--mud-palette-text-secondary);">
-                        Delete user.ltx to regenerate defaults on next launch.
+                        @Loc.T("main.reset_user_ltx.desc")
                     </MudText>
                 </MudItem>
             </MudGrid>
         </MudPaper>
 
-        @* ── Game Paths Info ── *@
-        @if (_paths != null)
-        {
-            <MudExpansionPanels Class="mb-4">
-                <MudExpansionPanel Text="Game Paths" Style="background-color: rgba(58, 58, 50, 0.6);">
-                    <MudSimpleTable Dense="true" Style="background-color: transparent;">
-                        <tbody>
-                            <tr>
-                                <td><MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Game Root</MudText></td>
-                                <td><MudText Typo="Typo.body2">@_paths.GameRoot</MudText></td>
-                            </tr>
-                            <tr>
-                                <td><MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Appdata</MudText></td>
-                                <td><MudText Typo="Typo.body2">@_paths.Appdata</MudText></td>
-                            </tr>
-                            <tr>
-                                <td><MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Gamedata</MudText></td>
-                                <td><MudText Typo="Typo.body2">@_paths.Gamedata</MudText></td>
-                            </tr>
-                            <tr>
-                                <td><MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Bin</MudText></td>
-                                <td><MudText Typo="Typo.body2">@_paths.Bin</MudText></td>
-                            </tr>
-                            <tr>
-                                <td><MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);">Launcher Dir</MudText></td>
-                                <td><MudText Typo="Typo.body2">@_paths.LauncherDir</MudText></td>
-                            </tr>
-                        </tbody>
-                    </MudSimpleTable>
-                </MudExpansionPanel>
-            </MudExpansionPanels>
-        }
+       
 
     </MudContainer>
 }
 
 @code
 {
+    [CascadingParameter(Name = "Language")] public string? Language { get; set; }
+
     private LauncherConfig _config = new();
     private GamePaths? _paths;
     private bool _loading = true;
@@ -195,7 +168,7 @@ else
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to load configuration: {ex.Message}", Severity.Error);
+            Snackbar.Add(string.Format(Loc.T("snackbar.config_load_failed"), ex.Message), Severity.Error);
         }
         finally
         {
@@ -235,7 +208,7 @@ else
         {
             await InvokeAsync(() =>
             {
-                Snackbar.Add($"Failed to save config: {ex.Message}", Severity.Error);
+                Snackbar.Add(string.Format(Loc.T("snackbar.config_save_failed"), ex.Message), Severity.Error);
                 StateHasChanged();
             });
         }
@@ -247,11 +220,11 @@ else
         try
         {
             await Tauri.Core.Invoke("launch_game");
-            Snackbar.Add("Game launched", Severity.Success);
+            Snackbar.Add(Loc.T("snackbar.game_launched"), Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to launch: {ex.Message}", Severity.Error);
+            Snackbar.Add(string.Format(Loc.T("snackbar.launch_failed"), ex.Message), Severity.Error);
         }
         finally
         {
@@ -262,8 +235,8 @@ else
     private async Task ClearShaderCache()
     {
         var confirmed = await ConfirmAction(
-            "Clear Shader Cache",
-            "This will delete the compiled shader cache. Shaders will be recompiled on next game launch, which may cause longer initial load times. Continue?");
+            Loc.T("main.clear_shader_cache"),
+            Loc.T("dialog.clear_shader_cache"));
 
         if (!confirmed) return;
 
@@ -272,11 +245,11 @@ else
         {
             var bytesFreed = await Tauri.Core.Invoke<long>("clear_shader_cache");
             var mb = bytesFreed / (1024.0 * 1024.0);
-            Snackbar.Add($"Shader cache cleared ({mb:F1} MB freed)", Severity.Success);
+            Snackbar.Add(string.Format(Loc.T("snackbar.shader_cache_cleared"), mb.ToString("F1")), Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to clear shader cache: {ex.Message}", Severity.Error);
+            Snackbar.Add(string.Format(Loc.T("snackbar.shader_cache_failed"), ex.Message), Severity.Error);
         }
         finally
         {
@@ -287,8 +260,8 @@ else
     private async Task ResetUserLtx()
     {
         var confirmed = await ConfirmAction(
-            "Reset user.ltx",
-            "This will delete user.ltx. The game will regenerate it with default settings on next launch. All console command values will be reset. Continue?");
+            Loc.T("main.reset_user_ltx"),
+            Loc.T("dialog.reset_user_ltx"));
 
         if (!confirmed) return;
 
@@ -296,11 +269,11 @@ else
         try
         {
             await Tauri.Core.Invoke("reset_user_ltx");
-            Snackbar.Add("user.ltx has been reset", Severity.Success);
+            Snackbar.Add(Loc.T("snackbar.user_ltx_reset"), Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to reset user.ltx: {ex.Message}", Severity.Error);
+            Snackbar.Add(string.Format(Loc.T("snackbar.user_ltx_failed"), ex.Message), Severity.Error);
         }
         finally
         {
@@ -313,7 +286,7 @@ else
         var parameters = new DialogParameters<ConfirmDialog>
         {
             { x => x.ContentText, message },
-            { x => x.ButtonText, "Confirm" },
+            { x => x.ButtonText, Loc.T("ui.confirm") },
             { x => x.Color, Color.Warning }
         };
 

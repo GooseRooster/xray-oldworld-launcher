@@ -1,10 +1,13 @@
 @using XrayOldworldLauncher.Models.Options
+@using XrayOldworldLauncher.Services
+@inject LocalizationService Loc
 
 <MudStack Spacing="0" Class="mb-2">
-    <MudText Typo="Typo.body2">@Definition.Label</MudText>
-    @if (!string.IsNullOrEmpty(Definition.Description))
+    <MudText Typo="Typo.body2">@Loc.T($"opt.{Definition.Id}")</MudText>
+    @{ var desc = Loc.TryGet($"opt.{Definition.Id}.desc"); }
+    @if (desc != null)
     {
-        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">@Definition.Description</MudText>
+        <MudText Typo="Typo.caption" Style="color: var(--mud-palette-text-secondary);">@desc</MudText>
     }
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
         <MudSlider T="double"
@@ -22,6 +25,7 @@
 </MudStack>
 
 @code {
+    [CascadingParameter(Name = "Language")] public string? Language { get; set; }
     [Parameter] public OptionDefinition Definition { get; set; } = null!;
     [Parameter] public string Value { get; set; } = "0";
     [Parameter] public EventCallback<string> ValueChanged { get; set; }

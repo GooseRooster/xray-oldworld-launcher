@@ -1,4 +1,6 @@
 @using XrayOldworldLauncher.Models.Options
+@using XrayOldworldLauncher.Services
+@inject LocalizationService Loc
 
 @switch (Definition.Type)
 {
@@ -22,11 +24,12 @@
         <MudDivider Class="my-3" />
         break;
     case OptionType.Title:
-        <MudText Typo="Typo.subtitle1" Class="mt-3 mb-1" Style="color: var(--mud-palette-primary);">@Definition.Label</MudText>
+        <MudText Typo="Typo.subtitle1" Class="mt-3 mb-1" Style="color: var(--mud-palette-primary);">@Loc.T($"title.{Definition.Id}")</MudText>
         break;
 }
 
 @code {
+    [CascadingParameter(Name = "Language")] public string? Language { get; set; }
     [Parameter] public OptionDefinition Definition { get; set; } = null!;
     [Parameter] public string Value { get; set; } = "";
     [Parameter] public EventCallback<string> ValueChanged { get; set; }

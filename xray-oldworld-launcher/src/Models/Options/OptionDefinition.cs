@@ -19,15 +19,10 @@ public enum OptionValueType
     Float = 2
 }
 
-public class ListItem
-{
-    public string Value { get; set; } = "";
-    public string? DisplayText { get; set; }
-}
-
 public class OptionDefinition
 {
     /// Unique identifier within the group (e.g., "show_crosshair")
+    /// Also serves as the localization key: opt.{Id} for label, opt.{Id}.desc for description
     public string Id { get; set; } = "";
 
     /// The type of UI control to render
@@ -52,14 +47,9 @@ public class OptionDefinition
     /// For Track type: step increment
     public double? Step { get; set; }
 
-    /// For List/Radio types: available choices
-    public List<ListItem>? Content { get; set; }
-
-    /// Display label for the option
-    public string Label { get; set; } = "";
-
-    /// Tooltip/description text
-    public string? Description { get; set; }
+    /// For List/Radio types: available choice values
+    /// Display text is resolved via LocalizationService.ContentText(Id, value)
+    public List<string>? Content { get; set; }
 
     /// If true, boolean values are written as "1"/"0" instead of "on"/"off"
     /// (relevant for console commands in user.ltx)

@@ -1,11 +1,13 @@
 @* Simple confirmation dialog used for destructive actions *@
+@using XrayOldworldLauncher.Services
+@inject LocalizationService Loc
 
 <MudDialog>
     <DialogContent>
         <MudText>@ContentText</MudText>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton OnClick="Cancel">@Loc.T("ui.cancel")</MudButton>
         <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit">@ButtonText</MudButton>
     </DialogActions>
 </MudDialog>

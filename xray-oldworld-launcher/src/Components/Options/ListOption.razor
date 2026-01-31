@@ -1,9 +1,11 @@
 @using XrayOldworldLauncher.Models.Options
+@using XrayOldworldLauncher.Services
+@inject LocalizationService Loc
 
 <MudSelect T="string"
            Value="@Value"
            ValueChanged="OnValueChanged"
-           Label="@Definition.Label"
+           Label="@Loc.T($"opt.{Definition.Id}")"
            Variant="Variant.Outlined"
            Dense="true"
            Margin="Margin.Dense"
@@ -12,16 +14,18 @@
     {
         @foreach (var item in Definition.Content)
         {
-            <MudSelectItem Value="@item.Value">@(item.DisplayText ?? item.Value)</MudSelectItem>
+            <MudSelectItem Value="@item">@Loc.ContentText(Definition.Id, item)</MudSelectItem>
         }
     }
 </MudSelect>
-@if (!string.IsNullOrEmpty(Definition.Description))
+@{ var desc = Loc.TryGet($"opt.{Definition.Id}.desc"); }
+@if (desc != null)
 {
-    <MudText Typo="Typo.caption" Class="mt-n1 mb-2" Style="color: var(--mud-palette-text-secondary);">@Definition.Description</MudText>
+    <MudText Typo="Typo.caption" Class="mt-n1 mb-2" Style="color: var(--mud-palette-text-secondary);">@desc</MudText>
 }
 
 @code {
+    [CascadingParameter(Name = "Language")] public string? Language { get; set; }
     [Parameter] public OptionDefinition Definition { get; set; } = null!;
     [Parameter] public string Value { get; set; } = "";
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
