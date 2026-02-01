@@ -11,12 +11,14 @@
       <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="mt-2 mb-4">
             <MudButton Variant="Variant.Outlined" Color="Color.Warning"
                        OnClick="ResetToDefaults" Disabled="@_busy"
-                       StartIcon="@Icons.Material.Filled.RestartAlt">
+                       StartIcon="@Icons.Material.Filled.RestartAlt"
+                       Class="zone-button-outlined">
                 @Loc.T("ui.reset_to_defaults")
             </MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary"
                        OnClick="Save" Disabled="@(!StateService.HasPendingChanges || _busy)"
-                       StartIcon="@Icons.Material.Filled.Save">
+                       StartIcon="@Icons.Material.Filled.Save"
+                       Class="zone-button-filled">
                 @if (_saving)
                 {
                     <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" Class="mr-1" />

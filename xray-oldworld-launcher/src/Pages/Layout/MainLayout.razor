@@ -16,9 +16,8 @@
     <ZoneBackground BackgroundImageUrl="/assets/background-alt.png" RainDropCount="30" />
     <MudLayout>
 
-        <MudAppBar Color="Color.Surface" Class="zone-appbar noise-texture"
-                   Elevation="0"
-                   Style="background: rgba(58, 58, 50, 0.85); backdrop-filter: blur(8px);">
+        <MudAppBar Color="Color.Surface" Class="zone-appbar-textured metal-shine scratched with-noise metal-border oxidized-metal grimy-filter rusted-edge"
+                   Elevation="0">
             @Loc.T("app.title")
             <MudSpacer />
             <MudButtonGroup OverrideStyles="false" Size="MudBlazor.Size.Small" Variant="Variant.Text">
@@ -36,9 +35,8 @@
                 </MudButton>
             </MudButtonGroup>
         </MudAppBar>
-        <MudDrawer Open="true" Color="Color.Surface" Class="zone-drawer grimy-overlay"
-                   Elevation="0"
-                   Style="background: rgba(58, 58, 50, 0.9); backdrop-filter: blur(10px);">
+        <MudDrawer Open="true" Color="Color.Surface" Class="zone-drawer-textured metal-shine scratched with-noise metal-border oxidized-metal grimy-filter rusted-edge"
+                   Elevation="0">
             <MudNavMenu>
                 <MudNavLink Class="metal-border" Href="/" Match="@NavLinkMatch.All" Icon="@ZoneIcons.Radiation">
                     @Loc.T("nav.main")
@@ -56,7 +54,7 @@
         </MudDrawer>
         <MudMainContent Style="background-color: transparent;">
             <CascadingValue Value="@Loc.CurrentLanguage" Name="Language">
-                <div class="content-panel">
+                <div class="content-panel zone-drawer-textured metal-shine scratched with-noise metal-border oxidized-metal grimy-filter rusted-edge">
                     @Body
                 </div>
             </CascadingValue>

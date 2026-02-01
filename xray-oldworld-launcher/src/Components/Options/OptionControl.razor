@@ -21,10 +21,10 @@
         <InputOption Definition="@Definition" Value="@Value" ValueChanged="@ValueChanged" />
         break;
     case OptionType.Line:
-        <MudDivider Class="my-3" />
+        <div class="industrial-divider" style="margin: 12px 0;"></div>
         break;
     case OptionType.Title:
-        <MudText Typo="Typo.subtitle1" Class="mt-3 mb-1" Style="color: var(--mud-palette-primary);">@Loc.T($"title.{Definition.Id}")</MudText>
+        <MudText Typo="Typo.subtitle1" Class="worn-text mt-3 mb-1" Style="color: var(--mud-palette-primary); letter-spacing: 0.5px;">@Loc.T($"title.{Definition.Id}")</MudText>
         break;
 }
 

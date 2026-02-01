@@ -4,8 +4,9 @@
 @inject OptionsStateService StateService
 @inject LocalizationService Loc
 
-<div class="pa-4 mb-3">
-    <MudText Typo="Typo.h6" Class="mb-3">@Loc.T($"group.{PageId}.{Group.Id}")</MudText>
+<div class="zone-option-group pa-4 mb-3">
+    <MudText Typo="Typo.h6" Class="worn-text mb-1" Style="letter-spacing: 1px;">@Loc.T($"group.{PageId}.{Group.Id}")</MudText>
+    <div class="industrial-divider" style="margin-top: 0; margin-bottom: 12px;"></div>
 
     @foreach (var opt in Group.Options)
     {
