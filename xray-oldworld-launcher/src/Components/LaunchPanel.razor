@@ -1,4 +1,3 @@
-@page "/"
 @using XrayOldworldLauncher.Services
 @inject Tauri Tauri
 @inject LocalizationService Loc
@@ -6,101 +5,53 @@
 @inject IDialogService DialogService
 @implements IDisposable
 
-@if (_loading)
-{
-    <MudContainer MaxWidth="MaxWidth.Medium" Class="pa-4" Style="background-color: transparent;">
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" Class="mb-4" />
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="150px" />
-    </MudContainer>
-}
-else
-{
-    <MudContainer MaxWidth="MaxWidth.Medium" Class="pa-4" Style="background-color: transparent;">
+<div class="launch-panel pa-3">
+    @if (_loading)
+    {
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+    }
+    else
+    {
+        @* ── Configuration Controls ── *@
+        <MudStack Spacing="3">
+            <MudSwitch T="bool"
+                       Label="@Loc.T("main.debug_mode")"
+                       Color="Color.Warning"
+                       Value="@_config.DebugMode"
+                       ValueChanged="@(v => OnConfigChanged(() => _config.DebugMode = v))" />
 
-        @* ── Launch Configuration ── *@
-        <MudText Typo="Typo.h5" Class="worn-text mb-1" Style="color: var(--mud-palette-primary); letter-spacing: 1px;">
-            @Loc.T("main.launch_config")
-        </MudText>
-        <div class="industrial-divider" style="margin-top: 0; margin-bottom: 12px;"></div>
+            <MudSwitch T="bool"
+                       Label="@Loc.T("main.use_avx")"
+                       Color="Color.Primary"
+                       Value="@_config.UseAvx"
+                       ValueChanged="@(v => OnConfigChanged(() => _config.UseAvx = v))" />
 
-        <div class="zone-main-config zone-option-group pa-4 mb-4">
-            <MudGrid Spacing="3">
-                <MudItem xs="12" sm="6">
-                    <MudSwitch T="bool"
-                               Label="@Loc.T("main.use_avx")"
-                               Color="Color.Primary"
-                               Value="@_config.UseAvx"
-                               ValueChanged="@(v => OnConfigChanged(() => _config.UseAvx = v))" />
-                    <MudText Typo="Typo.caption" Class="ml-12" Style="color: var(--mud-palette-text-secondary);">
-                        @Loc.T("main.use_avx.desc")
-                    </MudText>
-                </MudItem>
+            <MudSelect T="int"
+                       Label="@Loc.T("main.shadow_map_size")"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Value="@_config.ShadowMapSize"
+                       ValueChanged="@(v => OnConfigChanged(() => _config.ShadowMapSize = v))">
+                <MudSelectItem T="int" Value="1536">1536</MudSelectItem>
+                <MudSelectItem T="int" Value="2048">2048 (@Loc.T("ui.default"))</MudSelectItem>
+                <MudSelectItem T="int" Value="2560">2560</MudSelectItem>
+                <MudSelectItem T="int" Value="3072">3072</MudSelectItem>
+                <MudSelectItem T="int" Value="4096">4096</MudSelectItem>
+            </MudSelect>
 
-                <MudItem xs="12" sm="6">
-                    <MudSwitch T="bool"
-                               Label="@Loc.T("main.debug_mode")"
-                               Color="Color.Warning"
-                               Value="@_config.DebugMode"
-                               ValueChanged="@(v => OnConfigChanged(() => _config.DebugMode = v))" />
-                    <MudText Typo="Typo.caption" Class="ml-12" Style="color: var(--mud-palette-text-secondary);">
-                        @Loc.T("main.debug_mode.desc")
-                    </MudText>
-                </MudItem>
+            <MudTextField T="string"
+                          Label="@Loc.T("main.custom_args")"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Value="@_config.CustomArgs"
+                          ValueChanged="@(v => OnConfigChanged(() => _config.CustomArgs = v))"
+                          Placeholder="@Loc.T("main.custom_args.placeholder")" />
+        </MudStack>
 
-                <MudItem xs="12" sm="6">
-                    <MudSelect T="int"
-                               Label="@Loc.T("main.shadow_map_size")"
-                               Variant="Variant.Outlined"
-                               Value="@_config.ShadowMapSize"
-                               ValueChanged="@(v => OnConfigChanged(() => _config.ShadowMapSize = v))">
-                        <MudSelectItem T="int" Value="1536">1536</MudSelectItem>
-                        <MudSelectItem T="int" Value="2048">2048 (@Loc.T("ui.default"))</MudSelectItem>
-                        <MudSelectItem T="int" Value="2560">2560</MudSelectItem>
-                        <MudSelectItem T="int" Value="3072">3072</MudSelectItem>
-                        <MudSelectItem T="int" Value="4096">4096</MudSelectItem>
-                    </MudSelect>
-                </MudItem>
-
-                <MudItem xs="12" sm="6">
-                    <MudTextField T="string"
-                                  Label="@Loc.T("main.custom_args")"
-                                  Variant="Variant.Outlined"
-                                  Value="@_config.CustomArgs"
-                                  ValueChanged="@(v => OnConfigChanged(() => _config.CustomArgs = v))"
-                                  Placeholder="@Loc.T("main.custom_args.placeholder")" />
-                </MudItem>
-            </MudGrid>
-        </div>
-
-        @* ── Launch Button ── *@
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   Size="MudBlazor.Size.Large"
-                   FullWidth="true"
-                   Class="zone-button-launch mb-6"
-                   Style="font-size: 1.2rem; letter-spacing: 2px; padding: 16px;"
-                   Disabled="@_launching"
-                   OnClick="LaunchGame">
-            @if (_launching)
-            {
-                <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" Class="mr-2" />
-                <span>@Loc.T("ui.launching")</span>
-            }
-            else
-            {
-                <span>@Loc.T("ui.enter_the_zone")</span>
-            }
-        </MudButton>
-
-        @* ── Maintenance ── *@
-        <MudText Typo="Typo.h5" Class="worn-text mb-1" Style="color: var(--mud-palette-primary); letter-spacing: 1px;">
-            @Loc.T("main.maintenance")
-        </MudText>
-        <div class="industrial-divider" style="margin-top: 0; margin-bottom: 12px;"></div>
-
-        <MudPaper Class="zone-option-group pa-4 mb-4" Elevation="0">
-            <MudGrid Spacing="3">
-                <MudItem xs="12" sm="6">
+        @* ── Bottom: Clear buttons + Play ── *@
+        <div class="launch-panel-actions mt-auto pt-4">
+            <div class="d-flex gap-2" style="align-items: stretch;">
+                <MudStack Spacing="2" Class="flex-grow-1">
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Warning"
                                FullWidth="true"
@@ -117,12 +68,7 @@ else
                             <span>@Loc.T("main.clear_shader_cache")</span>
                         }
                     </MudButton>
-                    <MudText Typo="Typo.caption" Class="mt-1" Style="color: var(--mud-palette-text-secondary);">
-                        @Loc.T("main.clear_shader_cache.desc")
-                    </MudText>
-                </MudItem>
 
-                <MudItem xs="12" sm="6">
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Error"
                                FullWidth="true"
@@ -139,17 +85,26 @@ else
                             <span>@Loc.T("main.reset_user_ltx")</span>
                         }
                     </MudButton>
-                    <MudText Typo="Typo.caption" Class="mt-1" Style="color: var(--mud-palette-text-secondary);">
-                        @Loc.T("main.reset_user_ltx.desc")
-                    </MudText>
-                </MudItem>
-            </MudGrid>
-        </MudPaper>
+                </MudStack>
 
-       
-
-    </MudContainer>
-}
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Class="zone-button-launch launch-play-button"
+                           Disabled="@_launching"
+                           OnClick="LaunchGame">
+                    @if (_launching)
+                    {
+                        <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="MudBlazor.Size.Large" />
+                    }
+                </MudButton>
+            </div>
+        </div>
+    }
+</div>
 
 @code
 {
@@ -187,7 +142,6 @@ else
         StateHasChanged();
     }
 
-    /// Debounce saves so rapid changes (e.g. typing in custom args) don't spam the backend.
     private void DebounceSave()
     {
         _saveDebounce?.Stop();

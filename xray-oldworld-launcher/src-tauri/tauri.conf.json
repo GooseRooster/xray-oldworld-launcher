@@ -14,8 +14,11 @@
     "windows": [
       {
         "title": "Old World Launcher",
-        "fullscreen": true,
-        "decorations": false
+        "width": 1280,
+        "height": 720,
+        "resizable": true,
+        "decorations": true,
+        "center": true
       }
     ],
     "security": {

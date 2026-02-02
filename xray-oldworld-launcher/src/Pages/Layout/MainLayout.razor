@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
 @using XrayOldworldLauncher.Models.Options
+@using XrayOldworldLauncher.OptionDefinitions
 @using XrayOldworldLauncher.Services
 @inject LocalizationService Loc
 @inject Tauri Tauri
@@ -18,8 +19,35 @@
 
         <MudAppBar Color="Color.Surface" Class="zone-appbar-textured metal-shine scratched with-noise metal-border oxidized-metal grimy-filter rusted-edge"
                    Elevation="0">
-            @Loc.T("app.title")
+            <MudText Typo="Typo.h6" Class="worn-text" Style="white-space: nowrap;">
+                @Loc.T("app.title")
+            </MudText>
+
+            @* ── Tab Navigation ── *@
+            <MudButtonGroup OverrideStyles="false" Size="MudBlazor.Size.Small" Variant="Variant.Text" Class="ml-4">
+                <MudButton OnClick="@(() => _activeTab = 0)"
+                           Color="@(_activeTab == 0 ? Color.Primary : Color.Default)"
+                           Variant="@(_activeTab == 0 ? Variant.Filled : Variant.Text)"
+                           Size="MudBlazor.Size.Small">
+                    @Loc.T("nav.video")
+                </MudButton>
+                <MudButton OnClick="@(() => _activeTab = 1)"
+                           Color="@(_activeTab == 1 ? Color.Primary : Color.Default)"
+                           Variant="@(_activeTab == 1 ? Variant.Filled : Variant.Text)"
+                           Size="MudBlazor.Size.Small">
+                    @Loc.T("nav.sound")
+                </MudButton>
+                <MudButton OnClick="@(() => _activeTab = 2)"
+                           Color="@(_activeTab == 2 ? Color.Primary : Color.Default)"
+                           Variant="@(_activeTab == 2 ? Variant.Filled : Variant.Text)"
+                           Size="MudBlazor.Size.Small">
+                    @Loc.T("nav.control")
+                </MudButton>
+            </MudButtonGroup>
+
             <MudSpacer />
+
+            @* ── Language Toggle ── *@
             <MudButtonGroup OverrideStyles="false" Size="MudBlazor.Size.Small" Variant="Variant.Text">
                 <MudButton OnClick="@(() => SetLanguage("en"))"
                            Color="@(Loc.CurrentLanguage == "en" ? Color.Primary : Color.Default)"
@@ -34,33 +62,31 @@
                     RU
                 </MudButton>
             </MudButtonGroup>
-            <MudIconButton Icon="@Icons.Material.Filled.Close"
-                           Color="Color.Default"
-                           Size="MudBlazor.Size.Small"
-                           OnClick="ExitApp"
-                           Title="Close" />
         </MudAppBar>
-        <MudDrawer Open="true" Color="Color.Surface" Class="zone-drawer-textured metal-shine scratched with-noise metal-border oxidized-metal grimy-filter rusted-edge"
-                   Elevation="0">
-            <MudNavMenu>
-                <MudNavLink Class="metal-border" Href="/" Match="@NavLinkMatch.All" Icon="@ZoneIcons.Radiation">
-                    @Loc.T("nav.main")
-                </MudNavLink>
-                <MudNavLink Class="metal-border" Href="/video" Icon="@ZoneIcons.Video">
-                    @Loc.T("nav.video")
-                </MudNavLink>
-                <MudNavLink Class="metal-border" Href="/sound" Icon="@ZoneIcons.Sound">
-                    @Loc.T("nav.sound")
-                </MudNavLink>
-                <MudNavLink Class="metal-border" Href="/control" Icon="@ZoneIcons.Controls">
-                    @Loc.T("nav.control")
-                </MudNavLink>
-            </MudNavMenu>
-        </MudDrawer>
+
         <MudMainContent Style="background-color: transparent;">
             <CascadingValue Value="@Loc.CurrentLanguage" Name="Language">
-                <div class="content-panel zone-drawer-textured metal-shine scratched with-noise metal-border oxidized-metal grimy-filter rusted-edge">
-                    @Body
+                <div class="launcher-body">
+                    @* ── Left Panel: Tab Content (scrollable) ── *@
+                    <div class="launcher-left-panel">
+                        @switch (_activeTab)
+                        {
+                            case 0:
+                                <OptionPageLayout Page="@_videoPage" />
+                                break;
+                            case 1:
+                                <OptionPageLayout Page="@_soundPage" />
+                                break;
+                            case 2:
+                                <OptionPageLayout Page="@_controlPage" />
+                                break;
+                        }
+                    </div>
+
+                    @* ── Right Panel: Launch Settings (always visible) ── *@
+                    <div class="launcher-right-panel metal-shine scratched with-noise metal-border oxidized-metal grimy-filter rusted-edge">
+                        <LaunchPanel />
+                    </div>
                 </div>
             </CascadingValue>
         </MudMainContent>
@@ -73,6 +99,11 @@ else
 
 @code {
     private bool _initialized;
+    private int _activeTab;
+
+    private readonly OptionPage _videoPage = VideoPageDefinition.Build();
+    private readonly OptionPage _soundPage = SoundPageDefinition.Build();
+    private readonly OptionPage _controlPage = ControlPageDefinition.Build();
 
     MudTheme clearSkyTheme = new MudTheme() {
          PaletteDark = new PaletteDark() {
@@ -130,11 +161,6 @@ else
         {
             Console.Error.WriteLine($"Failed to save language preference: {ex.Message}");
         }
-    }
-
-    private async Task ExitApp()
-    {
-        await Tauri.Core.Invoke("exit_app");
     }
 
     private void OnLanguageChanged() => InvokeAsync(StateHasChanged);

@@ -7,7 +7,7 @@
 @inject IDialogService DialogService
 @implements IDisposable
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="py-4" Style="background-color: transparent;">
+<div class="pa-4" style="background-color: transparent;">
       <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="mt-2 mb-4">
             <MudButton Variant="Variant.Outlined" Color="Color.Warning"
                        OnClick="ResetToDefaults" Disabled="@_busy"
@@ -35,7 +35,7 @@
         {
             <OptionFormGroup Group="@group" PageId="@Page.Id" />
         }
-</MudContainer>
+</div>
 
 @code {
     [CascadingParameter(Name = "Language")] public string? Language { get; set; }

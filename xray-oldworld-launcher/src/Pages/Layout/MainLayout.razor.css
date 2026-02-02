@@ -1,6 +1,46 @@
-.content-panel {
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-    min-height: calc(100vh - 64px);
+.launcher-body {
+    display: flex;
+    height: calc(100vh - 64px); /* Full height minus MudAppBar */
+    overflow: hidden;
+}
+
+/* Left panel: most transparent — zone background bleeds through */
+.launcher-left-panel {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-width: 0;
+    background-repeat: no-repeat, repeat;
+    background-size: auto, 512px 512px;
+    background-blend-mode: normal, overlay;
+}
+
+/* Right panel: mostly opaque — solid feel for launch controls */
+.launcher-right-panel {
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
+    overflow-y: auto;
+    border-left: 1px solid rgba(90, 107, 125, 0.3);
+    background:
+        linear-gradient(90deg, rgba(47, 53, 61, 0.82) 0%, rgba(58, 58, 50, 0.82) 100%),
+        url('/assets/Textures/brushed-metal-tile.jpg');
+    background-repeat: no-repeat, repeat;
+    background-size: auto, 512px 512px;
+    background-blend-mode: normal, overlay;
+}
+
+/* LaunchPanel: make the panel fill the right column and push actions to bottom */
+.launcher-right-panel ::deep .launch-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+/* Play button: stretch to match the stacked clear/reset buttons */
+.launcher-right-panel ::deep .launch-play-button {
+    min-width: 56px;
+    max-width: 56px;
+    padding: 0;
+    align-self: stretch;
 }
