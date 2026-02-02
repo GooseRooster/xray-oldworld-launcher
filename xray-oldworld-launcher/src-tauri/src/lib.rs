@@ -1,5 +1,6 @@
 mod config;
 mod game;
+mod logging;
 
 use std::collections::HashMap;
 use std::sync::RwLock;
@@ -32,10 +33,37 @@ impl AppState {
             .map(|p| p.to_path_buf())
             .ok_or_else(|| "Failed to get launcher directory".to_string())?;
 
+        // Initialize logging as early as possible
+        logging::init(&launcher_dir);
+        logging::log("Initializing Old World Launcher...");
+
+        // Dump Proton/Wine/gamescope environment for diagnostics
+        logging::log("--- Environment (Proton/Wine/HDR) ---");
+        for key in &[
+            "PROTON_ENABLE_HDR",
+            "PROTON_USE_NTSYNC",
+            "DXVK_HDR",
+            "ENABLE_GAMESCOPE_WSI",
+            "WINEPREFIX",
+            "STEAM_COMPAT_DATA_PATH",
+            "DISPLAY",
+            "WAYLAND_DISPLAY",
+            "XDG_CURRENT_DESKTOP",
+        ] {
+            match std::env::var(key) {
+                Ok(val) => logging::log(format!("  {}={}", key, val)),
+                Err(_) => logging::log(format!("  {} (not set)", key)),
+            }
+        }
+        logging::log("--- End Environment ---");
+
         let config = LauncherConfig::load(&launcher_dir);
+        logging::log(format!("Launcher config loaded: game_root={:?}", config.game_root));
 
         // Resolve paths using config's game_root
         let paths = GamePaths::resolve(config.game_root.as_deref())?;
+
+        logging::log("Initialization complete.");
 
         *self.paths.write().map_err(|e| e.to_string())? = Some(paths);
         *self.launcher_config.write().map_err(|e| e.to_string())? = config;
@@ -97,12 +125,15 @@ fn get_game_paths(state: tauri::State<'_, AppState>) -> Result<GamePaths, String
 
 #[tauri::command]
 fn get_options(state: tauri::State<'_, AppState>) -> Result<OptionsState, String> {
+    logging::log("IPC: get_options called");
     let paths = state.get_paths()?;
 
     let user = UserLtx::load(&paths.appdata);
+    let all = user.get_all();
+    logging::log(format!("IPC: get_options returning {} commands", all.len()));
 
     Ok(OptionsState {
-        user_ltx: user.get_all(),
+        user_ltx: all,
     })
 }
 
@@ -188,7 +219,12 @@ pub fn run() {
 
     // Attempt initialization but don't fail — paths may not be available yet
     // (user might need to configure game_root through the UI)
-    let _ = app_state.initialize();
+    if let Err(e) = app_state.initialize() {
+        // Logging may or may not be initialized at this point depending on
+        // where the failure occurred. Try to log anyway.
+        logging::log(format!("ERROR: Initialization failed: {}", e));
+        eprintln!("Old World Launcher: initialization failed: {}", e);
+    }
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())

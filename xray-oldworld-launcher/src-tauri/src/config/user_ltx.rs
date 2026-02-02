@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+use crate::logging;
+
 /// Represents a parsed user.ltx file.
 /// user.ltx uses a flat format with no sections: `command value` per line.
 pub struct UserLtx {
@@ -31,12 +33,27 @@ impl UserLtx {
     /// Returns empty state if file doesn't exist.
     pub fn load(appdata_path: &Path) -> Self {
         let path = Self::file_path(appdata_path);
+        logging::log(format!("Loading user.ltx from: {}", path.display()));
+
         if !path.exists() {
+            logging::log("user.ltx does not exist, returning empty state");
             return Self::new();
         }
+
         match fs::read_to_string(&path) {
-            Ok(content) => Self::parse(&content),
-            Err(_) => Self::new(),
+            Ok(content) => {
+                let ltx = Self::parse(&content);
+                logging::log(format!(
+                    "user.ltx loaded: {} bytes, {} commands parsed",
+                    content.len(),
+                    ltx.index.len()
+                ));
+                ltx
+            }
+            Err(e) => {
+                logging::log(format!("ERROR reading user.ltx: {}", e));
+                Self::new()
+            }
         }
     }
 

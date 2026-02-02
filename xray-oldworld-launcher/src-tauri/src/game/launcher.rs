@@ -3,6 +3,7 @@ use std::path::Path;
 use std::process::Command;
 
 use crate::config::launcher_config::LauncherConfig;
+use crate::logging;
 
 /// Launch the game executable with configured arguments.
 pub fn launch_game(game_root: &Path, config: &LauncherConfig) -> Result<(), String> {
@@ -14,6 +15,7 @@ pub fn launch_game(game_root: &Path, config: &LauncherConfig) -> Result<(), Stri
 
     let exe_path = game_root.join("bin").join(exe_name);
     if !exe_path.exists() {
+        logging::log(format!("ERROR: Game executable not found: {}", exe_path.display()));
         return Err(format!("Game executable not found: {:?}", exe_path));
     }
 
@@ -37,12 +39,29 @@ pub fn launch_game(game_root: &Path, config: &LauncherConfig) -> Result<(), Stri
         }
     }
 
+    logging::log("--- Game Launch ---");
+    logging::log(format!("Exe:  {}", exe_path.display()));
+    logging::log(format!("Args: {:?}", args));
+    logging::log(format!("CWD:  {}", game_root.display()));
+
+    // Log HDR-critical env vars at launch time to verify they haven't been lost
+    for key in &["PROTON_ENABLE_HDR", "DXVK_HDR", "ENABLE_GAMESCOPE_WSI"] {
+        match std::env::var(key) {
+            Ok(val) => logging::log(format!("  {}={}", key, val)),
+            Err(_) => logging::log(format!("  {} (not set)", key)),
+        }
+    }
+
     Command::new(&exe_path)
         .args(&args)
         .current_dir(game_root)
         .spawn()
-        .map_err(|e| format!("Failed to launch {:?}: {}", exe_path, e))?;
+        .map_err(|e| {
+            logging::log(format!("ERROR: Failed to launch: {}", e));
+            format!("Failed to launch {:?}: {}", exe_path, e)
+        })?;
 
+    logging::log("Game process spawned successfully.");
     Ok(())
 }
 
