@@ -13,9 +13,9 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "xray-oldworld-launcher",
-        "width": 800,
-        "height": 600
+        "title": "Old World Launcher",
+        "fullscreen": true,
+        "decorations": false
       }
     ],
     "security": {

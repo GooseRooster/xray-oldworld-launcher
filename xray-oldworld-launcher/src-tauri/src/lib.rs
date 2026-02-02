@@ -211,6 +211,12 @@ fn reset_user_ltx(state: tauri::State<'_, AppState>) -> Result<(), String> {
     game::launcher::reset_user_ltx(&paths.appdata)
 }
 
+#[tauri::command]
+fn exit_app(app: tauri::AppHandle) {
+    logging::log("Application exit requested.");
+    app.exit(0);
+}
+
 // -- Tauri Entry Point --
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -238,6 +244,7 @@ pub fn run() {
             launch_game,
             clear_shader_cache,
             reset_user_ltx,
+            exit_app,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -34,6 +34,11 @@
                     RU
                 </MudButton>
             </MudButtonGroup>
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                           Color="Color.Default"
+                           Size="MudBlazor.Size.Small"
+                           OnClick="ExitApp"
+                           Title="Close" />
         </MudAppBar>
         <MudDrawer Open="true" Color="Color.Surface" Class="zone-drawer-textured metal-shine scratched with-noise metal-border oxidized-metal grimy-filter rusted-edge"
                    Elevation="0">
@@ -125,6 +130,11 @@ else
         {
             Console.Error.WriteLine($"Failed to save language preference: {ex.Message}");
         }
+    }
+
+    private async Task ExitApp()
+    {
+        await Tauri.Core.Invoke("exit_app");
     }
 
     private void OnLanguageChanged() => InvokeAsync(StateHasChanged);

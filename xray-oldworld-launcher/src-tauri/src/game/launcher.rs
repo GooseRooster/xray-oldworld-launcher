@@ -52,14 +52,21 @@ pub fn launch_game(game_root: &Path, config: &LauncherConfig) -> Result<(), Stri
         }
     }
 
-    Command::new(&exe_path)
-        .args(&args)
-        .current_dir(game_root)
-        .spawn()
-        .map_err(|e| {
-            logging::log(format!("ERROR: Failed to launch: {}", e));
-            format!("Failed to launch {:?}: {}", exe_path, e)
-        })?;
+    let mut cmd = Command::new(&exe_path);
+    cmd.args(&args).current_dir(game_root);
+
+    // Bridge Proton HDR: if PROTON_ENABLE_HDR is set but DXVK_HDR isn't,
+    // Proton's launch script failed to propagate it. Set it explicitly so
+    // the game's DXVK instance picks it up.
+    if std::env::var("PROTON_ENABLE_HDR").is_ok() && std::env::var("DXVK_HDR").is_err() {
+        logging::log("DXVK_HDR not set but PROTON_ENABLE_HDR is — injecting DXVK_HDR=1");
+        cmd.env("DXVK_HDR", "1");
+    }
+
+    cmd.spawn().map_err(|e| {
+        logging::log(format!("ERROR: Failed to launch: {}", e));
+        format!("Failed to launch {:?}: {}", exe_path, e)
+    })?;
 
     logging::log("Game process spawned successfully.");
     Ok(())
