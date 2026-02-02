@@ -35,25 +35,7 @@ impl AppState {
             .map(|p| p.to_path_buf())
             .ok_or_else(|| "Failed to get launcher directory".to_string())?;
 
-        // Dump Proton/Wine/gamescope environment for diagnostics
-        logging::log("--- Environment (Proton/Wine/HDR) ---");
-        for key in &[
-            "PROTON_ENABLE_HDR",
-            "PROTON_USE_NTSYNC",
-            "DXVK_HDR",
-            "ENABLE_GAMESCOPE_WSI",
-            "WINEPREFIX",
-            "STEAM_COMPAT_DATA_PATH",
-            "DISPLAY",
-            "WAYLAND_DISPLAY",
-            "XDG_CURRENT_DESKTOP",
-        ] {
-            match std::env::var(key) {
-                Ok(val) => logging::log(format!("  {}={}", key, val)),
-                Err(_) => logging::log(format!("  {} (not set)", key)),
-            }
-        }
-        logging::log("--- End Environment ---");
+     
 
         let config = LauncherConfig::load(&launcher_dir);
         logging::log(format!("Launcher config loaded: game_root={:?}", config.game_root));
@@ -220,6 +202,14 @@ pub fn run() {
             logging::init(dir);
         }
     }
+
+    // Redirect panics to the log file — under Proton, stderr is invisible,
+    // so without this a panic inside Tauri's runtime just looks like a silent exit.
+    std::panic::set_hook(Box::new(|info| {
+        let msg = format!("PANIC: {}", info);
+        logging::log(&msg);
+        eprintln!("{}", msg);
+    }));
 
     let app_state = AppState::new();
 

@@ -44,24 +44,12 @@ pub fn launch_game(game_root: &Path, config: &LauncherConfig) -> Result<(), Stri
     logging::log(format!("Args: {:?}", args));
     logging::log(format!("CWD:  {}", game_root.display()));
 
-    // Log HDR-critical env vars at launch time to verify they haven't been lost
-    for key in &["PROTON_ENABLE_HDR", "DXVK_HDR", "ENABLE_GAMESCOPE_WSI"] {
-        match std::env::var(key) {
-            Ok(val) => logging::log(format!("  {}={}", key, val)),
-            Err(_) => logging::log(format!("  {} (not set)", key)),
-        }
-    }
+    
 
     let mut cmd = Command::new(&exe_path);
     cmd.args(&args).current_dir(game_root);
 
-    // Bridge Proton HDR: if PROTON_ENABLE_HDR is set but DXVK_HDR isn't,
-    // Proton's launch script failed to propagate it. Set it explicitly so
-    // the game's DXVK instance picks it up.
-    if std::env::var("PROTON_ENABLE_HDR").is_ok() && std::env::var("DXVK_HDR").is_err() {
-        logging::log("DXVK_HDR not set but PROTON_ENABLE_HDR is — injecting DXVK_HDR=1");
-        cmd.env("DXVK_HDR", "1");
-    }
+    
 
     cmd.spawn().map_err(|e| {
         logging::log(format!("ERROR: Failed to launch: {}", e));

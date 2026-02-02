@@ -2,7 +2,6 @@ name: Build Launcher
 
 env:
   ARTIFACT_NAME_WINDOWS: Old World Launcher.exe
-  ARTIFACT_NAME_LINUX: Old World Launcher.AppImage
 
 on:
   push:
@@ -28,11 +27,6 @@ jobs:
             build-args: --no-bundle
             build-output: xray-oldworld-launcher/src-tauri/target/release/xray-oldworld-launcher.exe
             output-name-env: ARTIFACT_NAME_WINDOWS
-          - platform: ubuntu-22.04
-            artifact-name: launcher-linux
-            build-args: --bundles appimage
-            build-output: xray-oldworld-launcher/src-tauri/target/release/bundle/appimage/*.AppImage
-            output-name-env: ARTIFACT_NAME_LINUX
 
     runs-on: ${{ matrix.platform }}
 
@@ -58,15 +52,7 @@ jobs:
         with:
           workspaces: xray-oldworld-launcher/src-tauri -> target
 
-      - name: Install Linux system dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev \
-            patchelf
+      
 
       - name: Install npm dependencies
         working-directory: xray-oldworld-launcher
