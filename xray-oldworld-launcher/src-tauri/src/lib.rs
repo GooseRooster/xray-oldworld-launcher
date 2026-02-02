@@ -25,17 +25,15 @@ impl AppState {
     }
 
     /// Initialize paths and load launcher config.
+    /// Logging must already be initialized before calling this.
     fn initialize(&self) -> Result<(), String> {
-        // Load launcher config first (it may contain game_root override)
+        logging::log("Initializing Old World Launcher...");
+
         let launcher_dir = std::env::current_exe()
             .map_err(|e| format!("Failed to get exe path: {}", e))?
             .parent()
             .map(|p| p.to_path_buf())
             .ok_or_else(|| "Failed to get launcher directory".to_string())?;
-
-        // Initialize logging as early as possible
-        logging::init(&launcher_dir);
-        logging::log("Initializing Old World Launcher...");
 
         // Dump Proton/Wine/gamescope environment for diagnostics
         logging::log("--- Environment (Proton/Wine/HDR) ---");
@@ -105,14 +103,7 @@ enum OptionStorage {
     UserLtx { cmd: String },
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ResetOption {
-    path: String,
-    default_value: String,
-    #[serde(flatten)]
-    storage: OptionStorage,
-}
+
 
 // -- Tauri Commands --
 
@@ -221,18 +212,27 @@ fn exit_app(app: tauri::AppHandle) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Initialize logging before anything else so we can capture all errors.
+    // This is separate from AppState::initialize() so that even if path
+    // resolution fails, we still have a log file to diagnose what happened.
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(dir) = exe_path.parent() {
+            logging::init(dir);
+        }
+    }
+
     let app_state = AppState::new();
 
     // Attempt initialization but don't fail — paths may not be available yet
     // (user might need to configure game_root through the UI)
     if let Err(e) = app_state.initialize() {
-        // Logging may or may not be initialized at this point depending on
-        // where the failure occurred. Try to log anyway.
         logging::log(format!("ERROR: Initialization failed: {}", e));
         eprintln!("Old World Launcher: initialization failed: {}", e);
     }
 
-    tauri::Builder::default()
+    logging::log("Starting Tauri runtime...");
+
+    let result = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(app_state)
         .invoke_handler(tauri::generate_handler![
@@ -246,6 +246,13 @@ pub fn run() {
             reset_user_ltx,
             exit_app,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .run(tauri::generate_context!());
+
+    match result {
+        Ok(()) => logging::log("Tauri runtime exited normally."),
+        Err(e) => {
+            logging::log(format!("FATAL: Tauri runtime failed: {}", e));
+            eprintln!("Old World Launcher: Tauri runtime failed: {}", e);
+        }
+    }
 }
