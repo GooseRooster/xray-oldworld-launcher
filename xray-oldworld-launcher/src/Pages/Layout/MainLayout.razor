@@ -4,6 +4,7 @@
 @using XrayOldworldLauncher.Services
 @inject LocalizationService Loc
 @inject Tauri Tauri
+@inject OptionsStateService StateService
 @implements IDisposable
 
 <MudThemeProvider Theme="clearSkyTheme" IsDarkMode="true"/>
@@ -28,19 +29,19 @@
                 <MudButton OnClick="@(() => _activeTab = 0)"
                            Color="@(_activeTab == 0 ? Color.Primary : Color.Default)"
                            Variant="@(_activeTab == 0 ? Variant.Filled : Variant.Text)"
-                           Size="MudBlazor.Size.Small">
+                           Size="MudBlazor.Size.Small" StartIcon="@ZoneIcons.Video">
                     @Loc.T("nav.video")
                 </MudButton>
                 <MudButton OnClick="@(() => _activeTab = 1)"
                            Color="@(_activeTab == 1 ? Color.Primary : Color.Default)"
                            Variant="@(_activeTab == 1 ? Variant.Filled : Variant.Text)"
-                           Size="MudBlazor.Size.Small">
+                           Size="MudBlazor.Size.Small" StartIcon="@ZoneIcons.Sound">
                     @Loc.T("nav.sound")
                 </MudButton>
                 <MudButton OnClick="@(() => _activeTab = 2)"
                            Color="@(_activeTab == 2 ? Color.Primary : Color.Default)"
                            Variant="@(_activeTab == 2 ? Variant.Filled : Variant.Text)"
-                           Size="MudBlazor.Size.Small">
+                           Size="MudBlazor.Size.Small" StartIcon="@ZoneIcons.Controls">
                     @Loc.T("nav.control")
                 </MudButton>
             </MudButtonGroup>
@@ -133,6 +134,9 @@ else
             var config = await Tauri.Core.Invoke<LauncherConfig>("get_launcher_config");
             var lang = config?.Language ?? "en";
             await Loc.InitializeAsync(lang);
+
+            // Load current option values from user.ltx
+            await StateService.RefreshCurrentValuesAsync();
         }
         catch
         {

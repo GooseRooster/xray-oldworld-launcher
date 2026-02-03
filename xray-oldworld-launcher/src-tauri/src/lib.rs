@@ -162,6 +162,17 @@ fn save_launcher_config(
 }
 
 #[tauri::command]
+fn get_platform() -> String {
+    if cfg!(target_os = "linux") {
+        "linux".to_string()
+    } else if cfg!(target_os = "windows") {
+        "windows".to_string()
+    } else {
+        "unknown".to_string()
+    }
+}
+
+#[tauri::command]
 fn launch_game(state: tauri::State<'_, AppState>) -> Result<(), String> {
     let paths = state.get_paths()?;
     let config = state
@@ -225,6 +236,7 @@ pub fn run() {
             save_options,
             get_launcher_config,
             save_launcher_config,
+            get_platform,
             launch_game,
             clear_shader_cache,
             reset_user_ltx,

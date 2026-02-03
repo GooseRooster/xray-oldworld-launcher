@@ -19,6 +19,7 @@ pub fn launch_game(game_root: &Path, config: &LauncherConfig) -> Result<(), Stri
         return Err(format!("Game executable not found: {:?}", exe_path));
     }
 
+    // Build the arguments list (shared between Windows and Linux)
     let mut args: Vec<String> = Vec::new();
 
     // Shadow map size
@@ -39,21 +40,80 @@ pub fn launch_game(game_root: &Path, config: &LauncherConfig) -> Result<(), Stri
         }
     }
 
-    logging::log("--- Game Launch ---");
+    // Platform-specific launch
+    if cfg!(target_os = "linux") {
+        launch_linux(game_root, &exe_path, config, &args)
+    } else {
+        launch_windows(game_root, &exe_path, &args)
+    }
+}
+
+/// Windows launch: directly execute the .exe
+fn launch_windows(game_root: &Path, exe_path: &Path, args: &[String]) -> Result<(), String> {
+    logging::log("--- Game Launch (Windows) ---");
     logging::log(format!("Exe:  {}", exe_path.display()));
     logging::log(format!("Args: {:?}", args));
     logging::log(format!("CWD:  {}", game_root.display()));
 
-    
-
-    let mut cmd = Command::new(&exe_path);
-    cmd.args(&args).current_dir(game_root);
-
-    
+    let mut cmd = Command::new(exe_path);
+    cmd.args(args).current_dir(game_root);
 
     cmd.spawn().map_err(|e| {
         logging::log(format!("ERROR: Failed to launch: {}", e));
         format!("Failed to launch {:?}: {}", exe_path, e)
+    })?;
+
+    logging::log("Game process spawned successfully.");
+    Ok(())
+}
+
+/// Linux launch: use custom command if provided, otherwise try direct execution
+fn launch_linux(game_root: &Path, exe_path: &Path, config: &LauncherConfig, args: &[String]) -> Result<(), String> {
+    logging::log("--- Game Launch (Linux) ---");
+
+    if let Some(custom_cmd) = &config.linux_custom_command {
+        if !custom_cmd.trim().is_empty() {
+            // User has provided a custom command
+            // Replace placeholders: {exe} with exe path, {args} with space-joined args
+            let exe_str = exe_path.to_string_lossy();
+            let args_str = args.join(" ");
+
+            let full_command = custom_cmd
+                .replace("{exe}", &exe_str)
+                .replace("{args}", &args_str);
+
+            logging::log(format!("Custom command: {}", full_command));
+            logging::log(format!("CWD: {}", game_root.display()));
+
+            // Execute via shell
+            let mut cmd = Command::new("sh");
+            cmd.arg("-c").arg(&full_command).current_dir(game_root);
+
+            cmd.spawn().map_err(|e| {
+                logging::log(format!("ERROR: Failed to launch custom command: {}", e));
+                format!("Failed to launch custom command: {}", e)
+            })?;
+
+            logging::log("Game process spawned successfully (custom command).");
+            return Ok(());
+        }
+    }
+
+    // Fallback: try direct execution (unlikely to work for Windows exe)
+    logging::log(format!("Exe:  {}", exe_path.display()));
+    logging::log(format!("Args: {:?}", args));
+    logging::log(format!("CWD:  {}", game_root.display()));
+    logging::log("WARNING: No linux_custom_command set, attempting direct execution (may fail)");
+
+    let mut cmd = Command::new(exe_path);
+    cmd.args(args).current_dir(game_root);
+
+    cmd.spawn().map_err(|e| {
+        logging::log(format!("ERROR: Failed to launch: {}", e));
+        format!(
+            "Failed to launch {:?}: {}. On Linux, set a custom launch command (e.g., wine {{exe}} {{args}})",
+            exe_path, e
+        )
     })?;
 
     logging::log("Game process spawned successfully.");

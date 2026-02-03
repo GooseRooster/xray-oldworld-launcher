@@ -21,4 +21,7 @@ public class LauncherConfig
 
     [JsonPropertyName("language")]
     public string Language { get; set; } = "en";
+
+    [JsonPropertyName("linuxCustomCommand")]
+    public string? LinuxCustomCommand { get; set; }
 }

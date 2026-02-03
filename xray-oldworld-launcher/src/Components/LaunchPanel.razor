@@ -46,6 +46,33 @@
                           Value="@_config.CustomArgs"
                           ValueChanged="@(v => OnConfigChanged(() => _config.CustomArgs = v))"
                           Placeholder="@Loc.T("main.custom_args.placeholder")" />
+
+            @if (_platform == "linux")
+            {
+                <MudTooltip Placement="Placement.Left" Arrow="true" Class="linux-command-tooltip">
+                    <ChildContent>
+                        <MudTextField T="string"
+                                      Label="@Loc.T("main.linux_custom_command")"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Value="@(_config.LinuxCustomCommand ?? "")"
+                                      ValueChanged="@(v => OnConfigChanged(() => _config.LinuxCustomCommand = string.IsNullOrWhiteSpace(v) ? null : v))"
+                                      Placeholder="wine {exe} {args}"
+                                      HelperText="@Loc.T("main.linux_custom_command.helper")" />
+                    </ChildContent>
+                    <TooltipContent>
+                        <div style="text-align: left; font-family: monospace; font-size: 0.85em;">
+                            <div style="margin-bottom: 8px; font-family: inherit; font-weight: bold;">@Loc.T("main.linux_custom_command.tooltip.title")</div>
+                            <div style="margin-bottom: 4px;">wine {exe} {args}</div>
+                            <div style="margin-bottom: 4px;">gamemoderun wine {exe} {args}</div>
+                            <div style="margin-bottom: 4px;">mangohud wine {exe} {args}</div>
+                            <div style="margin-bottom: 8px;">WINEPREFIX=/path wine {exe} {args}</div>
+                            <div style="margin-bottom: 4px; font-style: italic;">@Loc.T("main.linux_custom_command.tooltip.steam")</div>
+                            <div>steam steam://rungameid/APPID</div>
+                        </div>
+                    </TooltipContent>
+                </MudTooltip>
+            }
         </MudStack>
 
         @* ── Bottom: Clear buttons + Play ── *@
@@ -112,6 +139,7 @@
 
     private LauncherConfig _config = new();
     private GamePaths? _paths;
+    private string _platform = "windows";
     private bool _loading = true;
     private bool _launching;
     private bool _clearingCache;
@@ -122,6 +150,7 @@
     {
         try
         {
+            _platform = await Tauri.Core.Invoke<string>("get_platform") ?? "windows";
             _config = await Tauri.Core.Invoke<LauncherConfig>("get_launcher_config") ?? new();
             _paths = await Tauri.Core.Invoke<GamePaths>("get_game_paths");
         }
