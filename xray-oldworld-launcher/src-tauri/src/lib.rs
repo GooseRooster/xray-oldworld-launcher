@@ -162,6 +162,12 @@ fn save_launcher_config(
 }
 
 #[tauri::command]
+fn exit_app(app: tauri::AppHandle) {
+    logging::log("Exit requested by user.");
+    app.exit(0);
+}
+
+#[tauri::command]
 fn get_platform() -> String {
     if cfg!(target_os = "linux") {
         "linux".to_string()
@@ -237,6 +243,7 @@ pub fn run() {
             get_launcher_config,
             save_launcher_config,
             get_platform,
+            exit_app,
             launch_game,
             clear_shader_cache,
             reset_user_ltx,

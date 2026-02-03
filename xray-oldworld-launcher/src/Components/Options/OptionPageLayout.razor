@@ -1,40 +1,58 @@
 @using XrayOldworldLauncher.Models.Options
 @using XrayOldworldLauncher.Services
+@using XrayOldworldLauncher.OptionDefinitions
 
 @inject OptionsStateService StateService
 @inject LocalizationService Loc
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject Tauri Tauri
 @implements IDisposable
 
 <div class="pa-4" style="background-color: transparent;">
-      <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="mt-2 mb-4">
-            <MudButton Variant="Variant.Outlined" Color="Color.Warning"
-                       OnClick="ResetToDefaults" Disabled="@_busy"
-                       StartIcon="@Icons.Material.Filled.RestartAlt"
-                       Class="zone-button-outlined">
-                @Loc.T("ui.reset_to_defaults")
-            </MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                       OnClick="Save" Disabled="@(!StateService.HasPendingChanges || _busy)"
-                       StartIcon="@Icons.Material.Filled.Save"
-                       Class="zone-button-filled">
-                @if (_saving)
+    @* Preset selector (video page only) *@
+    @if (Page.Id == "video")
+    {
+        <MudStack Row="true" Spacing="2" Class="mb-4" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.subtitle2" Class="worn-text">@Loc.T("ui.preset")</MudText>
+            <MudSelect T="string" Value="@_selectedPreset" ValueChanged="OnPresetChanged"
+                       Variant="Variant.Outlined" Dense="true" Class="zone-select"
+                       Style="max-width: 200px;" Disabled="@_busy">
+                @foreach (var preset in VideoPresets.PresetNames)
                 {
-                    <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" Class="mr-1" />
-                    <span>@Loc.T("ui.saving")</span>
+                    <MudSelectItem Value="@preset">@Loc.T($"preset.{preset}")</MudSelectItem>
                 }
-                else
-                {
-                    <span>@Loc.T("ui.save")</span>
-                }
-            </MudButton>
+            </MudSelect>
         </MudStack>
+    }
 
-        @foreach (var group in Page.Groups)
-        {
-            <OptionFormGroup Group="@group" PageId="@Page.Id" />
-        }
+    <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd" Class="mt-2 mb-4">
+        <MudButton Variant="Variant.Outlined" Color="Color.Warning"
+                   OnClick="ResetToDefaults" Disabled="@_busy"
+                   StartIcon="@Icons.Material.Filled.RestartAlt"
+                   Class="zone-button-outlined">
+            @Loc.T("ui.reset_to_defaults")
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="Save" Disabled="@(!StateService.HasPendingChanges || _busy)"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   Class="zone-button-filled">
+            @if (_saving)
+            {
+                <MudProgressCircular Size="MudBlazor.Size.Small" Indeterminate="true" Class="mr-1" />
+                <span>@Loc.T("ui.saving")</span>
+            }
+            else
+            {
+                <span>@Loc.T("ui.save")</span>
+            }
+        </MudButton>
+    </MudStack>
+
+    @foreach (var group in Page.Groups)
+    {
+        <OptionFormGroup Group="@group" PageId="@Page.Id" />
+    }
 </div>
 
 @code {
@@ -45,9 +63,69 @@
     private bool _resetting;
     private bool _busy => _saving || _resetting;
 
+    // Preset selector state (video page only)
+    private string _selectedPreset = "medium";
+    private string _previousLightingStyle = "";
+    private LauncherConfig? _config;
+
     protected override async Task OnInitializedAsync()
     {
         StateService.OnStateChanged += OnStateChanged;
+
+        // Load config for preset memory (video page only)
+        if (Page.Id == "video")
+        {
+            await LoadConfig();
+            InitializePresetState();
+        }
+    }
+
+    private async Task LoadConfig()
+    {
+        try
+        {
+            _config = await Tauri.Core.Invoke<LauncherConfig>("get_launcher_config");
+        }
+        catch
+        {
+            _config = new LauncherConfig();
+        }
+    }
+
+    private void InitializePresetState()
+    {
+        var lightingStyle = StateService.GetLightingStyle();
+        _selectedPreset = lightingStyle == "st_opt_static"
+            ? (_config?.StaticLightingPreset ?? "medium")
+            : (_config?.DynamicLightingPreset ?? "medium");
+        _previousLightingStyle = lightingStyle;
+    }
+
+    private async Task OnPresetChanged(string presetName)
+    {
+        _selectedPreset = presetName;
+        var lightingStyle = StateService.GetLightingStyle();
+
+        // Apply the preset
+        StateService.ApplyPreset(presetName, lightingStyle);
+
+        // Remember the selection
+        if (_config != null)
+        {
+            if (lightingStyle == "st_opt_static")
+                _config.StaticLightingPreset = presetName;
+            else
+                _config.DynamicLightingPreset = presetName;
+
+            try
+            {
+                await Tauri.Core.Invoke("save_launcher_config", new { config = _config });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Failed to save preset preference: {ex.Message}");
+            }
+        }
     }
 
     private async Task Save()
@@ -100,7 +178,25 @@
         }
     }
 
-    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+    private void OnStateChanged()
+    {
+        // Check if lighting style changed (video page only)
+        if (Page.Id == "video" && _config != null)
+        {
+            var currentStyle = StateService.GetLightingStyle();
+            if (currentStyle != _previousLightingStyle)
+            {
+                // Lighting style changed - apply remembered preset for that mode
+                // Update guard FIRST to prevent re-entry during ApplyPreset
+                _previousLightingStyle = currentStyle;
+                _selectedPreset = currentStyle == "st_opt_static"
+                    ? _config.StaticLightingPreset
+                    : _config.DynamicLightingPreset;
+                StateService.ApplyPreset(_selectedPreset, currentStyle);
+            }
+        }
+        InvokeAsync(StateHasChanged);
+    }
 
     public void Dispose()
     {

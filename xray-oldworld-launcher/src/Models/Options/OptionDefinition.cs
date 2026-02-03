@@ -57,4 +57,10 @@ public class OptionDefinition
 
     /// Decimal precision for display (Track type)
     public int Precision { get; set; } = 2;
+
+    /// <summary>
+    /// Optional visibility condition. When set, the option is only shown if this
+    /// function returns true. Receives the current CmdValues dictionary.
+    /// </summary>
+    public Func<Dictionary<string, string>, bool>? VisibleWhen { get; set; }
 }

@@ -3,6 +3,7 @@
 
 @inject OptionsStateService StateService
 @inject LocalizationService Loc
+@implements IDisposable
 
 <div class="zone-option-group pa-4 mb-3">
     <MudText Typo="Typo.h6" Class="worn-text mb-1" Style="letter-spacing: 1px;">@Loc.T($"group.{PageId}.{Group.Id}")</MudText>
@@ -10,9 +11,12 @@
 
     @foreach (var opt in Group.Options)
     {
-        <OptionControl Definition="@opt"
-                       Value="@StateService.GetCurrentValue(opt, PageId, Group.Id)"
-                       ValueChanged="@(v => OnOptionChanged(opt, v))" />
+        @if (IsOptionVisible(opt))
+        {
+            <OptionControl Definition="@opt"
+                           Value="@StateService.GetCurrentValue(opt, PageId, Group.Id)"
+                           ValueChanged="@(v => OnOptionChanged(opt, v))" />
+        }
     }
 </div>
 
@@ -21,9 +25,27 @@
     [Parameter] public OptionGroup Group { get; set; } = null!;
     [Parameter] public string PageId { get; set; } = "";
 
+    protected override void OnInitialized()
+    {
+        StateService.OnStateChanged += OnStateChanged;
+    }
+
+    private bool IsOptionVisible(OptionDefinition opt)
+    {
+        if (opt.VisibleWhen == null) return true;
+        return opt.VisibleWhen(StateService.GetEffectiveValues());
+    }
+
     private void OnOptionChanged(OptionDefinition opt, string newValue)
     {
         StateService.SetPendingChange(opt, PageId, Group.Id, newValue);
         StateHasChanged();
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        StateService.OnStateChanged -= OnStateChanged;
     }
 }

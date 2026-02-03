@@ -24,4 +24,10 @@ public class LauncherConfig
 
     [JsonPropertyName("linuxCustomCommand")]
     public string? LinuxCustomCommand { get; set; }
+
+    [JsonPropertyName("dynamicLightingPreset")]
+    public string DynamicLightingPreset { get; set; } = "medium";
+
+    [JsonPropertyName("staticLightingPreset")]
+    public string StaticLightingPreset { get; set; } = "medium";
 }

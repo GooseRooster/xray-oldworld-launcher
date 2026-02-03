@@ -13,6 +13,7 @@
     "ui.confirm": "Confirm",
     "ui.reset": "Reset",
     "ui.default": "Default",
+    "ui.preset": "Preset",
     "ui.launching": "LAUNCHING...",
     "ui.enter_the_zone": "ENTER THE ZONE",
     "ui.clearing": "Clearing...",
@@ -210,5 +211,10 @@
     "opt.tf_aniso.content.1": "Off",
     "opt.tf_aniso.content.4": "x4",
     "opt.tf_aniso.content.8": "x8",
-    "opt.tf_aniso.content.16": "x16"
+    "opt.tf_aniso.content.16": "x16",
+
+    "preset.low": "Low",
+    "preset.medium": "Medium",
+    "preset.high": "High",
+    "preset.ultra": "Ultra"
 }

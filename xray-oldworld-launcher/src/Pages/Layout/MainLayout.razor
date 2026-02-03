@@ -63,6 +63,13 @@
                     RU
                 </MudButton>
             </MudButtonGroup>
+
+            @* ── Close Button ── *@
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                           Color="Color.Default"
+                           Size="MudBlazor.Size.Small"
+                           OnClick="CloseApp"
+                           Class="ml-2" />
         </MudAppBar>
 
         <MudMainContent Style="background-color: transparent;">
@@ -168,6 +175,11 @@ else
     }
 
     private void OnLanguageChanged() => InvokeAsync(StateHasChanged);
+
+    private async Task CloseApp()
+    {
+        await Tauri.Core.Invoke("exit_app");
+    }
 
     public void Dispose()
     {

@@ -238,4 +238,58 @@ public class OptionsStateService
             _ => value
         };
     }
+
+    /// <summary>
+    /// Gets a merged view of CmdValues with pending changes applied.
+    /// Used for visibility condition checks to reflect unsaved changes.
+    /// </summary>
+    public Dictionary<string, string> GetEffectiveValues()
+    {
+        var result = new Dictionary<string, string>(CmdValues);
+
+        // Overlay pending changes
+        foreach (var (_, change) in PendingChanges)
+        {
+            if (change.Cmd != null)
+            {
+                result[change.Cmd] = change.Value;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Gets the current lighting style value (checks pending changes first).
+    /// </summary>
+    public string GetLightingStyle()
+    {
+        if (PendingChanges.TryGetValue("video/basic/lighting_style", out var pending))
+            return pending.Value;
+        if (CmdValues.TryGetValue("r4_lighting_style", out var val))
+            return val;
+        return "st_opt_dynamic";
+    }
+
+    /// <summary>
+    /// Applies a video preset by setting pending changes for all preset options.
+    /// </summary>
+    /// <param name="presetName">Name of the preset (low, medium, high, ultra)</param>
+    /// <param name="lightingStyle">Current lighting style value</param>
+    public void ApplyPreset(string presetName, string lightingStyle)
+    {
+        var presetValues = lightingStyle == "st_opt_static"
+            ? VideoPresets.GetStaticPreset(presetName)
+            : VideoPresets.GetDynamicPreset(presetName);
+
+        foreach (var (cmd, value) in presetValues)
+        {
+            // Find the option definition by console command
+            var match = _allCmdOptions.FirstOrDefault(x => x.Opt.ConsoleCommand == cmd);
+            if (match.Opt != null)
+            {
+                SetPendingChange(match.Opt, match.PageId, match.GroupId, value);
+            }
+        }
+    }
 }

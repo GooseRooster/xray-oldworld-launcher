@@ -4,6 +4,13 @@ namespace XrayOldworldLauncher.OptionDefinitions;
 
 public static class VideoPageDefinition
 {
+    // Visibility predicates for lighting-dependent options
+    private static bool IsDynamicLighting(Dictionary<string, string> values)
+        => !values.TryGetValue("r4_lighting_style", out var v) || v != "st_opt_static";
+
+    private static bool IsStaticLighting(Dictionary<string, string> values)
+        => values.TryGetValue("r4_lighting_style", out var v) && v == "st_opt_static";
+
     public static OptionPage Build() => new()
     {
         Id = "video",
@@ -31,7 +38,8 @@ public static class VideoPageDefinition
                 Content = new() { "st_opt_dynamic", "st_opt_static" } },
             new() { Id = "static_lighting_quality", ConsoleCommand = "r4_static_lighting_quality", Type = OptionType.List, ValueType = OptionValueType.String,
                 DefaultValue = "st_opt_medium",
-                Content = new() { "st_opt_low", "st_opt_medium", "st_opt_high" } },
+                Content = new() { "st_opt_low", "st_opt_medium", "st_opt_high" },
+                VisibleWhen = IsStaticLighting },
             new() { Id = "hdr_enable", ConsoleCommand = "r4_hdr10_on", Type = OptionType.Check, ValueType = OptionValueType.Bool,
                 DefaultValue = "false", BoolToNum = true },
         }
@@ -59,7 +67,7 @@ public static class VideoPageDefinition
             new() { Id = "optimize_dynamic_geom", ConsoleCommand = "r__optimize_dynamic_geom", Type = OptionType.Track, ValueType = OptionValueType.Float,
                 DefaultValue = "2", Min = 0, Max = 4, Step = 1, Precision = 0 },
             new() { Id = "optimize_shadow_geom", ConsoleCommand = "r__optimize_shadow_geom", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true", VisibleWhen = IsDynamicLighting },
 
             // -- Rendering Quality --
             new() { Type = OptionType.Title, Id = "_rendering_quality" },
@@ -83,14 +91,14 @@ public static class VideoPageDefinition
             new() { Id = "detail_textures", ConsoleCommand = "r1_detail_textures", Type = OptionType.Check, ValueType = OptionValueType.Bool,
                 DefaultValue = "true" },
             new() { Id = "detail_bump", ConsoleCommand = "r2_detail_bump", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true", VisibleWhen = IsDynamicLighting },
             new() { Id = "steep_parallax", ConsoleCommand = "r2_steep_parallax", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true", VisibleWhen = IsDynamicLighting },
             new() { Id = "enable_tessellation", ConsoleCommand = "r4_enable_tessellation", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true", VisibleWhen = IsDynamicLighting },
             new() { Id = "material_style", ConsoleCommand = "r4_material_style", Type = OptionType.List, ValueType = OptionValueType.String,
                 DefaultValue = "st_opt_classic",
-                Content = new() { "st_opt_classic", "st_opt_pbr" } },
+                Content = new() { "st_opt_classic", "st_opt_pbr" }, VisibleWhen = IsDynamicLighting },
 
             // -- Grass --
             new() { Type = OptionType.Title, Id = "_grass" },
@@ -112,60 +120,60 @@ public static class VideoPageDefinition
             new() { Id = "gloss_factor", ConsoleCommand = "r2_gloss_factor", Type = OptionType.Track, ValueType = OptionValueType.Float,
                 DefaultValue = "1", Min = 0, Max = 10, Step = 0.5 },
             new() { Id = "sun", ConsoleCommand = "r2_sun", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true", VisibleWhen = IsDynamicLighting },
             new() { Id = "sun_quality", ConsoleCommand = "r2_sun_quality", Type = OptionType.List, ValueType = OptionValueType.String,
                 DefaultValue = "st_opt_medium",
-                Content = new() { "st_opt_low", "st_opt_medium", "st_opt_high", "st_opt_ultra", "st_opt_extreme" } },
+                Content = new() { "st_opt_low", "st_opt_medium", "st_opt_high", "st_opt_ultra", "st_opt_extreme" }, VisibleWhen = IsDynamicLighting },
             new() { Id = "sunshafts_mode", ConsoleCommand = "r2_sunshafts_mode", Type = OptionType.List, ValueType = OptionValueType.String,
                 DefaultValue = "volumetric",
-                Content = new() { "off", "volumetric", "screen_space", "combined" } },
+                Content = new() { "off", "volumetric", "screen_space", "combined" }, VisibleWhen = IsDynamicLighting },
             new() { Id = "sunshafts_quality", ConsoleCommand = "r2_sunshafts_quality", Type = OptionType.List, ValueType = OptionValueType.String,
                 DefaultValue = "st_opt_high",
-                Content = new() { "st_opt_low", "st_opt_medium", "st_opt_high" } },
+                Content = new() { "st_opt_low", "st_opt_medium", "st_opt_high" }, VisibleWhen = IsDynamicLighting },
             new() { Id = "sunshafts_value", ConsoleCommand = "r2_sunshafts_value", Type = OptionType.Track, ValueType = OptionValueType.Float,
-                DefaultValue = "1.0", Min = 0.5, Max = 2.0, Step = 0.1 },
+                DefaultValue = "1.0", Min = 0.5, Max = 2.0, Step = 0.1, VisibleWhen = IsDynamicLighting },
             new() { Id = "sunshafts_min", ConsoleCommand = "r2_sunshafts_min", Type = OptionType.Track, ValueType = OptionValueType.Float,
-                DefaultValue = "0.15", Min = 0, Max = 0.5, Step = 0.05 },
+                DefaultValue = "0.15", Min = 0, Max = 0.5, Step = 0.05, VisibleWhen = IsDynamicLighting },
             new() { Id = "ssao_mode", ConsoleCommand = "r2_ssao_mode", Type = OptionType.List, ValueType = OptionValueType.String,
                 DefaultValue = "ssdo",
-                Content = new() { "gtao", "ssdo" } },
+                Content = new() { "gtao", "ssdo" }, VisibleWhen = IsDynamicLighting },
             new() { Id = "ssao", ConsoleCommand = "r2_ssao", Type = OptionType.List, ValueType = OptionValueType.String,
                 DefaultValue = "st_opt_medium",
-                Content = new() { "st_opt_off", "st_opt_low", "st_opt_medium", "st_opt_high" } },
+                Content = new() { "st_opt_off", "st_opt_low", "st_opt_medium", "st_opt_high" }, VisibleWhen = IsDynamicLighting },
             new() { Id = "volumetric_lights", ConsoleCommand = "r2_volumetric_lights", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true", VisibleWhen = IsDynamicLighting },
             new() { Id = "point_light_shadows", ConsoleCommand = "r4_point_light_shadows", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "false", BoolToNum = true },
+                DefaultValue = "false", BoolToNum = true, VisibleWhen = IsDynamicLighting },
 
             // -- Effects --
             new() { Type = OptionType.Title, Id = "_effects" },
             new() { Id = "soft_particles", ConsoleCommand = "r2_soft_particles", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true", VisibleWhen = IsDynamicLighting },
             new() { Id = "dof_enable", ConsoleCommand = "r2_dof_enable", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true", VisibleWhen = IsDynamicLighting },
             new() { Id = "mblur_enable", ConsoleCommand = "r2_mblur_enabled", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "false" },
+                DefaultValue = "false", VisibleWhen = IsDynamicLighting },
             new() { Id = "mblur", ConsoleCommand = "r2_mblur", Type = OptionType.Track, ValueType = OptionValueType.Float,
-                DefaultValue = "0.4", Min = 0, Max = 1.0, Step = 0.05 },
+                DefaultValue = "0.4", Min = 0, Max = 1.0, Step = 0.05, VisibleWhen = IsDynamicLighting },
             new() { Id = "soft_water", ConsoleCommand = "r2_soft_water", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true" ,VisibleWhen = IsDynamicLighting},
             new() { Id = "ssfx_water", ConsoleCommand = "r3_ssfx_water", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "false", BoolToNum = true },
+                DefaultValue = "false", BoolToNum = true ,VisibleWhen = IsDynamicLighting},
             new() { Id = "dynamic_wet_surfaces", ConsoleCommand = "r3_dynamic_wet_surfaces", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true" ,VisibleWhen = IsDynamicLighting},
             new() { Id = "volumetric_smoke", ConsoleCommand = "r3_volumetric_smoke", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "true" },
+                DefaultValue = "true" ,VisibleWhen = IsDynamicLighting},
             new() { Id = "ssfx_fog", ConsoleCommand = "r3_ssfx_fog", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "false", BoolToNum = true },
+                DefaultValue = "false", BoolToNum = true ,VisibleWhen = IsDynamicLighting},
             new() { Id = "ssfx_shadows", ConsoleCommand = "r3_ssfx_shadows", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "false", BoolToNum = true },
+                DefaultValue = "false", BoolToNum = true, VisibleWhen = IsDynamicLighting },
             new() { Id = "ssfx_gi", ConsoleCommand = "r3_gi", Type = OptionType.Check, ValueType = OptionValueType.Bool,
-                DefaultValue = "false", BoolToNum = true },
+                DefaultValue = "false", BoolToNum = true, VisibleWhen = IsDynamicLighting },
             new() { Id = "hires_rts", ConsoleCommand = "r4_hires_rts", Type = OptionType.Check, ValueType = OptionValueType.Bool,
                 DefaultValue = "true", BoolToNum = true },
             new() { Id = "terrain_quality", ConsoleCommand = "r3_terrain_quality", Type = OptionType.List, ValueType = OptionValueType.String,
                 DefaultValue = "st_terrain_low",
-                Content = new() { "st_terrain_low", "st_terrain_mid", "st_terrain_high" } },
+                Content = new() { "st_terrain_low", "st_terrain_mid", "st_terrain_high" } ,VisibleWhen = IsDynamicLighting},
         }
     };
 }
