@@ -32,6 +32,8 @@ Only options backed by a `cmd=` console command are included. HUD tuning, SSFX d
   sudo apt install libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
   ```
 
+  - RECOMMENDED to use VSCode as it has the most mature Tauri environment with NPM.
+
 ## Development
 
 All commands run from `xray-oldworld-launcher/`:
