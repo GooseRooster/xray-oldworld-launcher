@@ -2,12 +2,13 @@ name: Build Launcher
 
 env:
   ARTIFACT_NAME_WINDOWS: Old World Launcher.exe
-  ARTIFACT_NAME_LINUX: Old World Launcher.AppImage
 
 on:
   push:
     branches:
       - '**'
+    tags:
+      - 'v*'
     paths:
       - 'xray-oldworld-launcher/**'
       - '.github/workflows/build.yml'
@@ -19,22 +20,7 @@ concurrency:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: windows-latest
-            artifact-name: launcher-windows
-            build-args: --no-bundle
-            build-output: xray-oldworld-launcher/src-tauri/target/release/xray-oldworld-launcher.exe
-            output-name-env: ARTIFACT_NAME_WINDOWS
-          - platform: ubuntu-20.04  # Changed from 22.04
-            artifact-name: launcher-linux
-            build-args: --bundles appimage
-            build-output: xray-oldworld-launcher/src-tauri/target/release/bundle/appimage/*.AppImage
-            output-name-env: ARTIFACT_NAME_LINUX
-
-    runs-on: ${{ matrix.platform }}
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -58,37 +44,70 @@ jobs:
         with:
           workspaces: xray-oldworld-launcher/src-tauri -> target
 
-      - name: Install Linux system dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.0-dev \  # Changed from 4.1
-            libayatana-appindicator3-dev \
-            librsvg2-dev \
-            patchelf \
-            libgtk-3-dev \
-            libglib2.0-dev \
-            pkg-config
-
       - name: Install npm dependencies
         working-directory: xray-oldworld-launcher
         run: npm install
 
       - name: Build Tauri app
         working-directory: xray-oldworld-launcher
-        run: npx tauri build ${{ matrix.build-args }}
+        run: npx tauri build --no-bundle
 
       - name: Rename output
         shell: bash
         run: |
-          OUTPUT_NAME="${{ env[matrix.output-name-env] }}"
           mkdir -p staging
-          cp ${{ matrix.build-output }} "staging/${OUTPUT_NAME}"
+          cp xray-oldworld-launcher/src-tauri/target/release/xray-oldworld-launcher.exe "staging/${{ env.ARTIFACT_NAME_WINDOWS }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact-name }}
+          name: launcher-windows
           path: staging/
           if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    # Only create release on main branch or version tags
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: launcher-windows
+          path: release/
+
+      - name: Determine release info
+        id: release-info
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "name=Old World Launcher ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+            echo "name=Old World Launcher (Latest Build)" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Delete existing latest release
+        if: steps.release-info.outputs.tag == 'latest'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --repo ${{ github.repository }} --yes || true
+          git push origin :refs/tags/latest || true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release-info.outputs.tag }}
+          name: ${{ steps.release-info.outputs.name }}
+          prerelease: ${{ steps.release-info.outputs.prerelease }}
+          files: release/*
+          generate_release_notes: true
+          make_latest: ${{ steps.release-info.outputs.tag != 'latest' }}
