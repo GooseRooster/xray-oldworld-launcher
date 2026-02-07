@@ -99,6 +99,8 @@
     "opt.geometry_lod": "LOD геометрии",
     "opt.mipbias": "Смещение MIP текстур",
     "opt.mipbias.desc": "Отрицат. = более чёткие текстуры",
+    "opt.tf_contrast": "Контрастность текстур",
+    "opt.tf_contrast.desc": "Усиливает контраст в тёмных участках для более выразительных текстур и неба",
     "opt.tf_aniso": "Анизотропная фильтрация",
     "opt.ssample_list": "MSAA",
     "opt.smaa": "Сглаживание SMAA",

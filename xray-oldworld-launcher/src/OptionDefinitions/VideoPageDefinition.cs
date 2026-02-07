@@ -77,6 +77,8 @@ public static class VideoPageDefinition
                 DefaultValue = "1.0", Min = 0.1, Max = 1.5, Step = 0.1 },
             new() { Id = "mipbias", ConsoleCommand = "r__tf_mipbias", Type = OptionType.Track, ValueType = OptionValueType.Float,
                 DefaultValue = "0.0", Min = -0.5, Max = 0.5, Step = 0.1 },
+            new() { Id = "tf_contrast", ConsoleCommand = "r__tf_contrast", Type = OptionType.Track, ValueType = OptionValueType.Float,
+                DefaultValue = "0.5", Min = 0, Max = 1, Step = 0.05 },
             new() { Id = "tf_aniso", ConsoleCommand = "r__tf_aniso", Type = OptionType.List, ValueType = OptionValueType.String,
                 DefaultValue = "16",
                 Content = new() { "1", "4", "8", "16" } },

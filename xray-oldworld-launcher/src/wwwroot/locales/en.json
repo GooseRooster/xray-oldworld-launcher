@@ -99,6 +99,8 @@
     "opt.geometry_lod": "Geometry LOD",
     "opt.mipbias": "Texture Mip Bias",
     "opt.mipbias.desc": "Negative = sharper textures",
+    "opt.tf_contrast": "Texture Contrast",
+    "opt.tf_contrast.desc": "Boosts contrast in darker surface regions for punchier textures and skies",
     "opt.tf_aniso": "Anisotropic Filtering",
     "opt.ssample_list": "MSAA",
     "opt.smaa": "SMAA Anti-Aliasing",
