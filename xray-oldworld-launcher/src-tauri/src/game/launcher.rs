@@ -134,13 +134,29 @@ pub fn clear_shader_cache(appdata_path: &Path) -> Result<u64, String> {
     Ok(bytes)
 }
 
-/// Delete user.ltx so the game regenerates it with defaults on next launch.
-pub fn reset_user_ltx(appdata_path: &Path) -> Result<(), String> {
-    let user_ltx = appdata_path.join("user.ltx");
-    if user_ltx.exists() {
-        fs::remove_file(&user_ltx)
-            .map_err(|e| format!("Failed to delete user.ltx at {:?}: {}", user_ltx, e))?;
+/// Reset user.ltx by overwriting it with user_default.ltx from game root.
+/// This restores all console commands to the OWA team-decided defaults.
+pub fn reset_user_ltx(appdata_path: &Path, game_root: &Path) -> Result<(), String> {
+    let default_path = game_root.join("user_default.ltx");
+    let user_path = appdata_path.join("user.ltx");
+
+    if !default_path.exists() {
+        // Fallback: if user_default.ltx is missing, just delete user.ltx
+        logging::log("user_default.ltx not found, falling back to delete");
+        if user_path.exists() {
+            fs::remove_file(&user_path)
+                .map_err(|e| format!("Failed to delete user.ltx: {}", e))?;
+        }
+        return Ok(());
     }
+
+    fs::copy(&default_path, &user_path)
+        .map_err(|e| format!("Failed to copy user_default.ltx to user.ltx: {}", e))?;
+
+    logging::log(format!(
+        "OWA: Reset user.ltx from user_default.ltx ({})",
+        default_path.display()
+    ));
     Ok(())
 }
 

@@ -101,7 +101,7 @@ fn get_options(state: tauri::State<'_, AppState>) -> Result<OptionsState, String
     logging::log("IPC: get_options called");
     let paths = state.get_paths()?;
 
-    let user = UserLtx::load(&paths.appdata);
+    let user = UserLtx::load_with_fallback(&paths.appdata, &paths.game_root);
     let all = user.get_all();
     logging::log(format!("IPC: get_options returning {} commands", all.len()));
 
@@ -198,7 +198,7 @@ fn clear_shader_cache(state: tauri::State<'_, AppState>) -> Result<u64, String> 
 #[tauri::command]
 fn reset_user_ltx(state: tauri::State<'_, AppState>) -> Result<(), String> {
     let paths = state.get_paths()?;
-    game::launcher::reset_user_ltx(&paths.appdata)
+    game::launcher::reset_user_ltx(&paths.appdata, &paths.game_root)
 }
 
 // -- Tauri Entry Point --

@@ -57,6 +57,41 @@ impl UserLtx {
         }
     }
 
+    /// Load user.ltx from appdata. If missing, fall back to user_default.ltx
+    /// in game root so the launcher shows OWA baseline values instead of empty state.
+    pub fn load_with_fallback(appdata_path: &Path, game_root: &Path) -> Self {
+        let user_path = Self::file_path(appdata_path);
+        if user_path.exists() {
+            return Self::load(appdata_path);
+        }
+
+        let default_path = game_root.join("user_default.ltx");
+        logging::log(format!(
+            "user.ltx not found, falling back to user_default.ltx at: {}",
+            default_path.display()
+        ));
+
+        if !default_path.exists() {
+            logging::log("user_default.ltx also not found, returning empty state");
+            return Self::new();
+        }
+
+        match fs::read_to_string(&default_path) {
+            Ok(content) => {
+                let ltx = Self::parse(&content);
+                logging::log(format!(
+                    "OWA: Applied mod defaults from user_default.ltx ({} commands)",
+                    ltx.index.len()
+                ));
+                ltx
+            }
+            Err(e) => {
+                logging::log(format!("ERROR reading user_default.ltx: {}", e));
+                Self::new()
+            }
+        }
+    }
+
     /// Parse user.ltx content.
     fn parse(content: &str) -> Self {
         let mut ltx = UserLtx::new();

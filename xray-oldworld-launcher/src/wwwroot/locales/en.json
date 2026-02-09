@@ -38,12 +38,12 @@
     "main.maintenance": "Maintenance",
     "main.clear_shader_cache": "Clear Shader Cache",
     "main.clear_shader_cache.desc": "Delete compiled shaders. They will be rebuilt on next launch.",
-    "main.reset_user_ltx": "Reset user.ltx",
-    "main.reset_user_ltx.desc": "Delete user.ltx to regenerate defaults on next launch.",
+    "main.reset_user_ltx": "Reset Settings",
+    "main.reset_user_ltx.desc": "Restores all console commands to OWA defaults from user_default.ltx.",
     
 
     "dialog.clear_shader_cache": "This will delete the compiled shader cache. Shaders will be recompiled on next game launch, which may cause longer initial load times. Continue?",
-    "dialog.reset_user_ltx": "This will delete user.ltx. The game will regenerate it with default settings on next launch. All console command values will be reset. Continue?",
+    "dialog.reset_user_ltx": "This will reset all settings to OWA defaults. Your current user.ltx will be overwritten with the baseline values from user_default.ltx. Continue?",
     "dialog.reset_options": "This will reset all {0} options to their default values. Any unsaved changes will be discarded. Continue?",
 
     "snackbar.options_saved": "Options saved successfully.",
@@ -54,7 +54,7 @@
     "snackbar.launch_failed": "Failed to launch: {0}",
     "snackbar.shader_cache_cleared": "Shader cache cleared ({0} MB freed)",
     "snackbar.shader_cache_failed": "Failed to clear shader cache: {0}",
-    "snackbar.user_ltx_reset": "user.ltx has been reset",
+    "snackbar.user_ltx_reset": "Settings restored to OWA defaults",
     "snackbar.user_ltx_failed": "Failed to reset user.ltx: {0}",
     "snackbar.config_load_failed": "Failed to load configuration: {0}",
     "snackbar.config_save_failed": "Failed to save config: {0}",

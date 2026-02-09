@@ -142,7 +142,7 @@ public static class VideoPresets
         ["r__tf_aniso"] = "16",
 
         // Anti-aliasing
-        ["r3_msaa"] = "2x",
+        ["r3_msaa"] = "st_opt_off",
         ["r2_smaa"] = "high",
         ["r3_ssfx_taa"] = "true",
 
@@ -189,7 +189,7 @@ public static class VideoPresets
         ["r__tf_aniso"] = "16",
 
         // Anti-aliasing
-        ["r3_msaa"] = "4x",
+        ["r3_msaa"] = "st_opt_off",
         ["r2_smaa"] = "ultra",
         ["r3_ssfx_taa"] = "true",
 
@@ -295,7 +295,7 @@ public static class VideoPresets
         ["r__tf_aniso"] = "16",
 
         // Anti-aliasing
-        ["r3_msaa"] = "2x",
+        ["r3_msaa"] = "st_opt_off",
         ["r2_smaa"] = "high",
         ["r3_ssfx_taa"] = "true",
 
@@ -322,7 +322,7 @@ public static class VideoPresets
         ["r__tf_aniso"] = "16",
 
         // Anti-aliasing
-        ["r3_msaa"] = "4x",
+        ["r3_msaa"] = "st_opt_off",
         ["r2_smaa"] = "ultra",
         ["r3_ssfx_taa"] = "true",
 
