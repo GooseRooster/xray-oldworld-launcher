@@ -193,8 +193,13 @@ public static class VideoPresets
         ["r2_smaa"] = "ultra",
         ["r3_ssfx_taa"] = "true",
 
+        // Rendering Distance
+        ["rs_vis_distance"] = "1.5",
+        ["r__optimize_static_geom"] = "0",
+        ["r__optimize_dynamic_geom"] = "0",
+
         // Grass
-        ["r__detail_density"] = "0.2",
+        ["r__detail_density"] = "0.36",
         ["r__detail_radius"] = "200",
 
         // Lighting & Shadows
@@ -326,8 +331,13 @@ public static class VideoPresets
         ["r2_smaa"] = "ultra",
         ["r3_ssfx_taa"] = "true",
 
+        // Rendering Distance
+        ["rs_vis_distance"] = "1.5",
+        ["r__optimize_static_geom"] = "0",
+        ["r__optimize_dynamic_geom"] = "0",
+
         // Grass
-        ["r__detail_density"] = "0.2",
+        ["r__detail_density"] = "0.36",
         ["r__detail_radius"] = "200",
 
         // Lighting

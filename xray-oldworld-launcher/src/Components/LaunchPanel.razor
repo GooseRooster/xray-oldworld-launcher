@@ -3,6 +3,7 @@
 @inject LocalizationService Loc
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject OptionsStateService StateService
 @implements IDisposable
 
 <div class="launch-panel pa-3">
@@ -255,7 +256,25 @@
         _resettingUserLtx = true;
         try
         {
+            // 1. Reset user.ltx to defaults
             await Tauri.Core.Invoke("reset_user_ltx");
+
+            // 2. Clear shader cache (settings changed)
+            try
+            {
+                await Tauri.Core.Invoke<long>("clear_shader_cache");
+            }
+            catch { /* shader cache may not exist */ }
+
+            // 3. Reapply the user's last selected preset
+            await StateService.RefreshCurrentValuesAsync();
+            var lightingStyle = StateService.GetLightingStyle();
+            var presetName = lightingStyle == "st_opt_static"
+                ? (_config.StaticLightingPreset ?? "medium")
+                : (_config.DynamicLightingPreset ?? "medium");
+            StateService.ApplyPreset(presetName, lightingStyle);
+            await StateService.SaveAllAsync();
+
             Snackbar.Add(Loc.T("snackbar.user_ltx_reset"), Severity.Success);
         }
         catch (Exception ex)
