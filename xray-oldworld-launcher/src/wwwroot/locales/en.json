@@ -172,8 +172,8 @@
     "opt.master_volume.desc": "Overall game sound volume",
     "opt.music_volume": "Music Volume",
     "opt.music_volume.desc": "Background music volume",
-    "opt.eax": "EAX / Environmental Audio",
-    "opt.eax.desc": "Enable environmental audio effects (reverb, echo)",
+    "opt.audio_effects_quality": "Audio Effects Quality",
+    "opt.audio_effects_quality.desc": "Audio effects quality (Low = EFX reverb only, Medium = Steam Audio hybrid reverb, High = Steam Audio hybrid with extended convolution). Requires restart.",
     "opt.dynamic_music": "Dynamic Music",
     "opt.dynamic_music.desc": "Music reacts to gameplay events",
 
